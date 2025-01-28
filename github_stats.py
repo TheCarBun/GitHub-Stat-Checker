@@ -54,3 +54,51 @@ def process_contribution_data(data):
         }
     except KeyError:
         return {"errors": "Invalid data structure"}
+
+def process_language_data(data):
+    """
+    Process the language data from GitHub API response.
+    Returns a dictionary of languages and their usage counts.
+    """
+    try:
+        # GraphQL query to get user's repositories and their languages
+        url = "https://api.github.com/graphql"
+        headers = {"Authorization": f"Bearer {data['token']}"}
+        query = """
+        {
+          viewer {
+            repositories(first: 100, ownerAffiliations: OWNER, isFork: false) {
+              nodes {
+                languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
+                  edges {
+                    size
+                    node {
+                      name
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        """
+        
+        response = requests.post(url, json={"query": query}, headers=headers)
+        response.raise_for_status()
+        
+        repo_data = response.json()
+        
+        # Process language data
+        language_counts = {}
+        repositories = repo_data['data']['viewer']['repositories']['nodes']
+        
+        for repo in repositories:
+            if repo['languages']['edges']:
+                for edge in repo['languages']['edges']:
+                    language = edge['node']['name']
+                    language_counts[language] = language_counts.get(language, 0) + 1
+        
+        return language_counts
+    except Exception as e:
+        print(f"Error processing language data: {str(e)}")
+        return None

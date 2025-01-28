@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-from github_stats import fetch_contribution_data, process_contribution_data
+from github_stats import fetch_contribution_data, process_contribution_data, process_language_data
+import matplotlib.pyplot as plt
 
 st.set_page_config(
     page_title="GitHub Stat Checker",
@@ -125,3 +126,57 @@ if username and token and button_pressed:
             st.markdown("🧙‍♂️ **GitHub Legend**")
 
         st.write("Keep growing your GitHub stats and unlock more achievements!")
+
+        # Add Language Distribution
+        st.header("Programming Languages")
+        language_data = process_language_data({"token": token})
+        
+        if language_data:
+            # Sort languages by count and take top 6 languages
+            sorted_data = dict(sorted(language_data.items(), key=lambda x: x[1], reverse=True))
+            top_languages = dict(list(sorted_data.items())[:6])
+            
+            # Add "Others" category for remaining languages
+            remaining_languages = dict(list(sorted_data.items())[6:])
+            if remaining_languages:
+                others_count = sum(remaining_languages.values())
+                top_languages["Others"] = others_count
+            
+            # Create figure with fixed size
+            fig, ax = plt.subplots(figsize=(8, 8))
+            
+            # Calculate percentages
+            total = sum(sorted_data.values())
+            
+            # Define colors for common programming languages
+            colors = ['#3572A5', '#f1e05a', '#e34c26', '#563d7c', '#2b7489', '#c6538c', '#808080']
+            
+            # Create pie chart
+            wedges, texts, autotexts = ax.pie(
+                top_languages.values(),
+                labels=top_languages.keys(),
+                autopct='%1.1f%%',
+                startangle=90,
+                colors=colors[:len(top_languages)],
+                textprops={'color': 'white', 'fontsize': 12},
+                wedgeprops={'edgecolor': 'white', 'linewidth': 1}
+            )
+            
+            ax.axis('equal')
+            
+            # Make the figure background transparent
+            fig.patch.set_alpha(0.0)
+            ax.patch.set_alpha(0.0)
+            
+            st.pyplot(fig)
+            
+            # Display language breakdown in a table
+            st.markdown("#### Language Breakdown")
+            lang_df = pd.DataFrame({
+                "Language": top_languages.keys(),
+                "Repositories": top_languages.values(),
+                "Percentage": [f"{count/total:.1%}" for count in top_languages.values()]
+            })
+            st.dataframe(lang_df, hide_index=True)
+        else:
+            st.warning("No language data available for the user's repositories.")
