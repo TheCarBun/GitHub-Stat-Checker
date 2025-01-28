@@ -5,24 +5,38 @@ def fetch_contribution_data(username, token):
     headers = {"Authorization": f"Bearer {token}"}
     query = f"""
     {{
-      user(login: "{username}") {{
-        contributionsCollection {{
-          contributionCalendar {{
-            totalContributions
-            weeks {{
-              contributionDays {{
-                date
-                contributionCount
-              }}
+        user(login: "{username}") {{
+            name
+            contributionsCollection {{
+                totalCommitContributions
+                restrictedContributionsCount
+                contributionCalendar {{
+                    totalContributions
+                    weeks {{
+                        contributionDays {{
+                            contributionCount
+                            date
+                        }}
+                    }}
+                }}
             }}
-          }}
+            repositories(first: 100, ownerAffiliations: OWNER, isFork: false) {{
+                edges {{
+                    node {{
+                        name
+                        primaryLanguage {{
+                            name
+                            color
+                        }}
+                    }}
+                }}
+            }}
         }}
-      }}
     }}
     """
     try:
         response = requests.post(url, json={"query": query}, headers=headers)
-        response.raise_for_status()  # Raises HTTPError if the response was unsuccessful
+        response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
         return {"errors": str(e)}
@@ -54,3 +68,26 @@ def process_contribution_data(data):
         }
     except KeyError:
         return {"errors": "Invalid data structure"}
+
+def process_language_data(data):
+    """
+    Process the language data from GitHub API response.
+    Returns a dictionary of languages and their usage counts.
+    """
+    try:
+        # Get repositories from the user data
+        repositories = data['data']['user']['repositories']['edges']
+        
+        # Process language data
+        language_counts = {}
+        
+        for edge in repositories:
+            repo = edge['node']
+            if repo['primaryLanguage']:
+                language = repo['primaryLanguage']['name']
+                language_counts[language] = language_counts.get(language, 0) + 1
+        
+        return language_counts
+    except Exception as e:
+        print(f"Error processing language data: {str(e)}")
+        return None
