@@ -129,7 +129,7 @@ if username and token and button_pressed:
 
         # Add Language Distribution
         st.header("Programming Languages")
-        language_data = process_language_data({"token": token})
+        language_data = process_language_data(raw_data)
         
         if language_data:
             # Sort languages by count and take top 6 languages
@@ -148,8 +148,20 @@ if username and token and button_pressed:
             # Calculate percentages
             total = sum(sorted_data.values())
             
-            # Define colors for common programming languages
-            colors = ['#3572A5', '#f1e05a', '#e34c26', '#563d7c', '#2b7489', '#c6538c', '#808080']
+            # Get colors from the API response
+            colors = []
+            for lang in top_languages.keys():
+                if lang == "Others":
+                    colors.append('#808080')  # Gray for Others
+                else:
+                    # Find the color for this language in the raw data
+                    for edge in raw_data['data']['user']['repositories']['edges']:
+                        repo = edge['node']
+                        if repo['primaryLanguage'] and repo['primaryLanguage']['name'] == lang:
+                            colors.append(repo['primaryLanguage']['color'])
+                            break
+                    else:
+                        colors.append('#808080')  # Fallback color if not found
             
             # Create pie chart
             wedges, texts, autotexts = ax.pie(
@@ -157,7 +169,7 @@ if username and token and button_pressed:
                 labels=top_languages.keys(),
                 autopct='%1.1f%%',
                 startangle=90,
-                colors=colors[:len(top_languages)],
+                colors=colors,
                 textprops={'color': 'white', 'fontsize': 12},
                 wedgeprops={'edgecolor': 'white', 'linewidth': 1}
             )
