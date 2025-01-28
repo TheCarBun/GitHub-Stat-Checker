@@ -32,12 +32,13 @@ if username and token and button_pressed:
             col1, col2 = st.columns(2)
             col1.metric(
                 "Total Contributions", 
-                stats['total_contributions'],
-                delta=f"{stats['highest_contribution']} Highest"
+                value= f"{stats['total_contributions']} commits",
+                delta=f"{stats['highest_contribution']} Highest",
+                delta_color= "off" if stats['current_streak'] == 0 else "normal"
                 )
             col2.metric(
                 "Longest Streak", 
-                stats['longest_streak'],
+                value= f"{stats['longest_streak']} days",
                 delta=f"{stats['current_streak']} Current",
                 delta_color= "off" if stats['current_streak'] == 0 else "normal"
                 )
