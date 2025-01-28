@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-from github_stats import fetch_contribution_data, process_contribution_data
+from github_stats import fetch_contribution_data, process_contribution_data, process_language_data
+import matplotlib.pyplot as plt
 
 st.set_page_config(
     page_title="GitHub Stat Checker",
@@ -126,3 +127,36 @@ if username and token and button_pressed:
             st.markdown("🧙‍♂️ **GitHub Legend**")
 
         st.write("Keep growing your GitHub stats and unlock more achievements!")
+
+        # Add Language Distribution
+        st.header("Programming Languages")
+        language_data = process_language_data(raw_data)
+        
+        if language_data:
+            # Adjust figure size based on number of languages
+            num_languages = len(language_data)
+            fig_size = min(8, max(6, num_languages * 0.5))
+            fig, ax = plt.subplots(figsize=(fig_size, fig_size))
+            
+            # Sort languages by count for better visualization
+            sorted_data = dict(sorted(language_data.items(), key=lambda x: x[1], reverse=True))
+            
+            # Calculate percentages
+            total = sum(sorted_data.values())
+            labels = [f"{lang}\n{count/total:.1%}" for lang, count in sorted_data.items()]
+            
+            ax.pie(sorted_data.values(), labels=labels, autopct='', startangle=90)
+            ax.axis('equal')
+            
+            st.pyplot(fig)
+            
+            # Display language breakdown in a table
+            st.markdown("#### Language Breakdown")
+            lang_df = pd.DataFrame({
+                "Language": sorted_data.keys(),
+                "Repositories": sorted_data.values(),
+                "Percentage": [f"{count/total:.1%}" for count in sorted_data.values()]
+            })
+            st.dataframe(lang_df, hide_index=True)
+        else:
+            st.warning("No language data available for the user's repositories.")
