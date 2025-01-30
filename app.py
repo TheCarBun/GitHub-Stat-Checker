@@ -26,6 +26,7 @@ if username and token and button_pressed:
     else:
         user_stats = process_user_data(raw_data)
         formatted_date = user_stats.get("formatted_date")
+
         joined_since = user_stats.get("joined_since")
         github_days = user_stats.get("github_days")
         active_days = user_stats.get("active_days")
