@@ -158,36 +158,59 @@ if username and token and button_pressed:
         # Custom Achievements (based on visible contributions)
         st.header("Achievements")
         with st.container(border=True):
-            if stats['current_streak'] <= 2:
-                st.markdown("🌱 **Streak Beginner**") 
-            elif stats['current_streak'] > 2 and stats['current_streak'] <= 7:
-                st.markdown("🌿 **Streak Novice**")
-            elif stats['current_streak'] > 7 and stats['current_streak'] <= 14:
-                st.markdown("🌳 **Streak Apprentice**") 
-            elif stats['current_streak'] > 14 and stats['current_streak'] <= 30:
-                st.markdown("⚔️ **Streak Journeyman**")
-            elif stats['current_streak'] > 30 and stats['current_streak'] <= 60:
-                st.markdown("🛡️ **Streak Expert**")
-            elif stats['current_streak'] > 60 and stats['current_streak'] <= 90:
-                st.markdown("🧙‍♂️ **Streak Master**")
-            elif stats['current_streak'] > 90:
-                st.markdown("🐉 **Streak Legend**") 
+            # Define achievements with their criteria and thresholds
+            streak_achievements = {
+                "Streak Beginner": {"required": 2, "criteria": "Made contributions for 2 consecutive days"},
+                "Streak Novice": {"required": 7, "criteria": "Made contributions for 7 consecutive days"},
+                "Streak Apprentice": {"required": 14, "criteria": "Made contributions for 14 consecutive days"},
+                "Streak Journeyman": {"required": 30, "criteria": "Made contributions for 30 consecutive days"},
+                "Streak Expert": {"required": 60, "criteria": "Made contributions for 60 consecutive days"},
+                "Streak Master": {"required": 90, "criteria": "Made contributions for 90 consecutive days"},
+                "Streak Legend": {"required": 120, "criteria": "Made contributions for 120+ consecutive days"}
+            }
 
+            contribution_achievements = {
+                "Contributor": {"required": 50, "criteria": "Made your first 50 contributions"},
+                "Regular Contributor": {"required": 100, "criteria": "Reached 100 total contributions"},
+                "Active Contributor": {"required": 500, "criteria": "Reached 500 total contributions"},
+                "Dedicated Contributor": {"required": 1000, "criteria": "Reached 1,000 total contributions"},
+                "Seasoned Contributor": {"required": 5000, "criteria": "Reached 5,000 total contributions"},
+                "GitHub Legend": {"required": 10000, "criteria": "Reached 10,000+ total contributions"}
+            }
+
+            # Display Streak Achievements
+            st.subheader("🔥 Streak Achievements")
+            current_streak = stats['current_streak']
             
-            if display_total < 50:
-                st.markdown("🌱 **Contributor**")
-            elif display_total >= 50 and display_total < 100:
-                st.markdown("🌿 **Regular Contributor**")
-            elif display_total >= 100 and display_total < 500:
-                st.markdown("🌳 **Active Contributor**")
-            elif display_total >= 500 and display_total < 1000:
-                st.markdown("⚔️ **Dedicated Contributor**")
-            elif display_total >= 1000 and display_total < 5000:
-                st.markdown("🛡️ **Seasoned Contributor**")
-            elif display_total >= 5000:
-                st.markdown("🧙‍♂️ **GitHub Legend**")
+            for title, details in streak_achievements.items():
+                progress = min(100, (current_streak / details["required"]) * 100)
+                if current_streak >= details["required"]:
+                    emoji = "✅"
+                    st.markdown(f"{emoji} **{title}** – {details['criteria']}")
+                else:
+                    emoji = "🔒"
+                    col1, col2 = st.columns([3, 1])
+                    col1.markdown(f"{emoji} **{title}** – {details['criteria']}")
+                    col2.markdown(f"Progress: {progress:.1f}%")
+                    if progress > 0:
+                        st.progress(progress / 100, text="")
 
-            st.write("Keep growing your GitHub stats and unlock more achievements!")
+            # Display Contribution Achievements
+            st.subheader("🏆 Contribution Achievements")
+            for title, details in contribution_achievements.items():
+                progress = min(100, (display_total / details["required"]) * 100)
+                if display_total >= details["required"]:
+                    emoji = "✅"
+                    st.markdown(f"{emoji} **{title}** – {details['criteria']}")
+                else:
+                    emoji = "🔒"
+                    col1, col2 = st.columns([3, 1])
+                    col1.markdown(f"{emoji} **{title}** – {details['criteria']}")
+                    col2.markdown(f"Progress: {progress:.1f}%")
+                    if progress > 0:
+                        st.progress(progress / 100, text="")
+
+            st.info("Keep growing your GitHub stats to unlock more achievements! 🚀", icon="💪")
 
         # Add Language Distribution
         st.header("Programming Languages")
