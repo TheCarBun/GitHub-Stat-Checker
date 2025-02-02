@@ -127,27 +127,17 @@ if username and token and button_pressed:
         # Custom Achievements
         st.header("Achievements")
         with st.container(border=True):
-            if stats['current_streak'] <= 2:
-                st.markdown("🌱 **Streak Beginner**") 
-            elif stats['current_streak'] > 2 and stats['current_streak'] <= 7:
-                st.markdown("🌿 **Streak Novice**")
-            elif stats['current_streak'] > 7 and stats['current_streak'] <= 14:
-                st.markdown("🌳 **Streak Apprentice**") 
-            elif stats['current_streak'] > 14 and stats['current_streak'] <= 30:
-                st.markdown("⚔️ **Streak Journeyman**")
-            elif stats['current_streak'] > 30 and stats['current_streak'] <= 60:
-                st.markdown("🛡️ **Streak Expert**")
-            elif stats['current_streak'] > 60 and stats['current_streak'] <= 90:
-                st.markdown("🧙‍♂️ **Streak Master**")
-            elif stats['current_streak'] > 90:
-                st.markdown("🐉 **Streak Legend**") 
+            streak_titles = [(0, 3, "🌱 **Streak Beginner**"),(3, 8, "🌿 **Streak Novice**"),(8, 15, "🌳 **Streak Apprentice**"),(15, 31, "⚔️ **Streak Journeyman**"),(31, 61, "🛡️ **Streak Expert**"),(61, 91, "🧙‍♂️ **Streak Master**"),(91, float('inf'), "🐉 **Streak Legend**")]
+            for min_streak, max_streak, title in streak_titles:
+                if min_streak <= stats['current_streak'] < max_streak:
+                    st.markdown(title)
+                    break
 
-            
-        contribution_titles = [(0, 50, "🌱 **Contributor**"),(50, 100, "🌿 **Regular Contributor**"),(100, 500, "🌳 **Active Contributor**"),(500, 1000, "⚔️ **Dedicated Contributor**"),(1000, 5000, "🛡️ **Seasoned Contributor**"),(5000, float('inf'), "🧙‍♂️ **GitHub Legend**")]
-        for min_contrib, max_contrib, title in contribution_titles:
-            if min_contrib <= stats['total_contributions'] < max_contrib:
-                st.markdown(title)
-                break
+            contribution_titles = [(0, 50, "🌱 **Contributor**"),(50, 100, "🌿 **Regular Contributor**"),(100, 500, "🌳 **Active Contributor**"),(500, 1000, "⚔️ **Dedicated Contributor**"),(1000, 5000, "🛡️ **Seasoned Contributor**"),(5000, float('inf'), "🧙‍♂️ **GitHub Legend**")]
+            for min_contrib, max_contrib, title in contribution_titles:
+                if min_contrib <= stats['total_contributions'] < max_contrib:
+                    st.markdown(title)
+                    break
 
 
             st.write("Keep growing your GitHub stats and unlock more achievements!")
