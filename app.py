@@ -143,18 +143,12 @@ if username and token and button_pressed:
                 st.markdown("🐉 **Streak Legend**") 
 
             
-            if stats['total_contributions'] < 50:
-                st.markdown("🌱 **Contributor**")
-            elif stats['total_contributions'] >= 50 and stats['total_contributions'] < 100:
-                st.markdown("🌿 **Regular Contributor**")
-            elif stats['total_contributions'] >= 100 and stats['total_contributions'] < 500:
-                st.markdown("🌳 **Active Contributor**")
-            elif stats['total_contributions'] >= 500 and stats['total_contributions'] < 1000:
-                st.markdown("⚔️ **Dedicated Contributor**")
-            elif stats['total_contributions'] >= 1000 and stats['total_contributions'] < 5000:
-                st.markdown("🛡️ **Seasoned Contributor**")
-            elif stats['total_contributions'] >= 5000:
-                st.markdown("🧙‍♂️ **GitHub Legend**")
+        contribution_titles = [(0, 50, "🌱 **Contributor**"),(50, 100, "🌿 **Regular Contributor**"),(100, 500, "🌳 **Active Contributor**"),(500, 1000, "⚔️ **Dedicated Contributor**"),(1000, 5000, "🛡️ **Seasoned Contributor**"),(5000, float('inf'), "🧙‍♂️ **GitHub Legend**")]
+        for min_contrib, max_contrib, title in contribution_titles:
+            if min_contrib <= stats['total_contributions'] < max_contrib:
+                st.markdown(title)
+                break
+
 
             st.write("Keep growing your GitHub stats and unlock more achievements!")
 
