@@ -3,24 +3,9 @@ import pandas as pd
 from datetime import datetime
 from github_stats import *
 import matplotlib.pyplot as plt
+from util import load_css
 
 color = "#26a641"
-
-def load_css() -> str:
-    """
-    Loads CSS stylesheet from local files.
-
-    Returns:
-    - str: The content of the CSS file.
-    """
-    try:
-        with open('static/styles.css') as f:
-            custom_css = f.read()
-        return custom_css
-    except FileNotFoundError:
-        print("❗Error loading stylesheet: File not found.")
-    except Exception as e:
-        print(f"❗Error loading stylesheet: {e}")
 
 def main():
     st.set_page_config(

@@ -24,9 +24,9 @@ def fetch_user_data(username, token):
                 totalCount
             }}
             contributionsCollection {{
-                totalCommitContributions  # Total commits
-                totalPullRequestContributions # Total pull requests
-                totalIssueContributions # Total issues
+                totalCommitContributions
+                totalPullRequestContributions
+                totalIssueContributions
                 }}
         }}
     }}

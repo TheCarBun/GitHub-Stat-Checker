@@ -33,3 +33,20 @@ def is_less_than_2_months_old(iso_date):
 def format_iso_date(iso_date):
     dt = datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%SZ")
     return dt.strftime("%B {day}, %Y").replace("{day}", str(dt.day) + ("st" if dt.day in [1, 21, 31] else "nd" if dt.day == 2 else "rd" if dt.day == 3 else "th"))
+
+def load_css() -> str:
+    """
+    Loads CSS stylesheet from local files.
+
+    Returns:
+    - str: The content of the CSS file.
+    """
+    try:
+        with open('static/styles.css') as f:
+            custom_css = f.read()
+        return custom_css
+    except FileNotFoundError:
+        print("❗Error loading stylesheet: File not found.")
+    except Exception as e:
+        print(f"❗Error loading stylesheet: {e}")
+
