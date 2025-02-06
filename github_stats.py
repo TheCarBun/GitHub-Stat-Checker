@@ -9,8 +9,11 @@ def fetch_user_data(username, token):
     query = f"""
     {{
         user(login: "{username}") {{
-            createdAt
             name
+            bio
+            location
+            createdAt
+            avatarUrl
             followers {{
                 totalCount
             }}
@@ -20,6 +23,11 @@ def fetch_user_data(username, token):
             repositories(ownerAffiliations: OWNER, isFork: false){{
                 totalCount
             }}
+            contributionsCollection {{
+                totalCommitContributions  # Total commits
+                totalPullRequestContributions # Total pull requests
+                totalIssueContributions # Total issues
+                }}
         }}
     }}
     """
@@ -186,21 +194,41 @@ def process_language_data(data):
 
 
 def process_user_data(data):
-    user_data = data['data']['user']
-    
-    # Calculate total GitHub days
-    created_at = user_data.get("createdAt")
-    formatted_date = format_iso_date(user_data.get("createdAt")) 
+    """
+    Process the user data from GitHub API response.
+    Returns a dictionary of user info like username, bio, location, etc.
+    """
+    try:
+        user_data = data['data']['user']
+        
+        # Calculate total GitHub days
+        created_at = user_data.get("createdAt")
+        formatted_date = format_iso_date(created_at) 
 
-    less_than_2_months_old = is_less_than_2_months_old(created_at)
-    github_days = (datetime.now() - datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")).days
+        less_than_2_months_old = is_less_than_2_months_old(created_at)
+        github_days = (datetime.now() - datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")).days
 
-    joined_since = format_duration(created_at)
+        joined_since = format_duration(created_at)
 
-    return {
-        "created_at": created_at,
-        "formatted_date": formatted_date,
-        "joined_since": joined_since,
-        "github_days": github_days,
-        "less_than_2_months_old": less_than_2_months_old
-    }
+        return {
+            "name": user_data.get("name", ""),
+            "bio": user_data.get("bio", ""),
+            "location": user_data.get("location", ""),
+            "created_at": created_at,
+            "avatar_url": user_data.get("avatarUrl"),
+            "followers": user_data.get("followers").get("totalCount", 0),
+            "following": user_data.get("following").get("totalCount", 0),
+            "repositories": user_data.get("repositories").get("totalCount", 0),
+            "total_commits": user_data.get("contributionsCollection").get("totalCommitContributions", 0),
+            "total_pullrequests": user_data.get("contributionsCollection").get("totalPullRequestContributions", 0),
+            "total_issues": user_data.get("contributionsCollection").get("totalIssueContributions", 0),
+            "formatted_date": formatted_date,
+            "joined_since": joined_since,
+            "github_days": github_days,
+            "less_than_2_months_old": less_than_2_months_old
+        }
+    except (KeyError, TypeError) as e:
+        print(f"Error processing contribution data: {str(e)}")
+        return {
+            "errors": str(e)
+        }

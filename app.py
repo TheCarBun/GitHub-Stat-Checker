@@ -6,6 +6,22 @@ import matplotlib.pyplot as plt
 
 color = "#26a641"
 
+def load_css() -> str:
+    """
+    Loads CSS stylesheet from local files.
+
+    Returns:
+    - str: The content of the CSS file.
+    """
+    try:
+        with open('static/styles.css') as f:
+            custom_css = f.read()
+        return custom_css
+    except FileNotFoundError:
+        print("❗Error loading stylesheet: File not found.")
+    except Exception as e:
+        print(f"❗Error loading stylesheet: {e}")
+
 def main():
     st.set_page_config(
         page_title = "GitHub Stat Checker",
@@ -43,74 +59,111 @@ def main():
 
             # --- User Stats Summary ---
             st.markdown("### User Summary")
-            with st.container(border=True):
-                formatted_date = user_stats.get("formatted_date")
-                joined_since = user_stats.get("joined_since")
-                github_days = user_stats.get("github_days")
-                active_days = cont_stats.get("active_days")
-                less_than_2_months_old = user_stats.get("less_than_2_months_old")
-        
-        
-                col1, col2 = st.columns(2)
-                col1.metric(
-                    label="Joined Github since",
-                    value= formatted_date,
-                    delta= joined_since,
-                    delta_color= "inverse" if less_than_2_months_old else "normal",
-                    border= True
-                )
+            with st.container():
+                user_info, user_stats_info = st.columns([1,3], border=True, vertical_alignment="center")
+                with user_info:
+                    avatar_url = user_stats.get("avatar_url")
+                    user_bio = user_stats.get("bio")
+                    location = user_stats.get("location")
+                    followers = user_stats.get("followers")
+                    following = user_stats.get("following")
+                    repositories = user_stats.get("repositories")
+                    total_prs = user_stats.get("total_pullrequests")
+                    total_issues = user_stats.get("total_issues")
 
-                col2.metric(
-                    label="Total days on GitHub",
-                    value= f"{github_days} days",
-                    delta= f"Active for: {active_days} days",
-                    delta_color= "off" if active_days < 7 else "normal",
-                    border= True
-                )
+                    custom_css = load_css()
+                    st.markdown(f"""
+                                <style>
+                                {custom_css}
+                                </style>
+                                """, unsafe_allow_html=True)
 
-                # --- Summary Stats ---
-                # st.markdown("### Summary Stats")
-                total_contributions = cont_stats.get("total_contributions", 0)
-                public_contributions = cont_stats.get("public_contributions", 0)
-                private_contributions = cont_stats.get("private_contributions", 0)
-                highest_contribution = cont_stats.get("highest_contribution", 0)
-                highest_contribution_date = cont_stats.get("highest_contribution_date", None)
-                current_streak = cont_stats.get("current_streak", 0)
-                longest_streak = cont_stats.get("longest_streak", 0)
-                days = cont_stats.get("days", [])
+                    st.markdown(f"""
+                                <div class="user-container">
+                                    <div class="user-card">
+                                        <img src="{avatar_url}" alt="Avatar" class="avatar">
+                                        <div class="username">{username}</div>
+                                        <div class="bio">{user_bio}</div>
+                                        <div class="stats">
+                                            <div class="stat">Location:<b> {location}</b></div>
+                                            <div class="stat">Repos:<b> {repositories}</b></div>
+                                            <div class="stat">Followers:<b> {followers}</b></div>
+                                            <div class="stat">Following:<b> {following}</b></div>
+                                            <div class="stat">PRs:<b> {total_prs}</b></div>
+                                            <div class="stat">Issues:<b> {total_issues}</b></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            """, unsafe_allow_html=True)
 
-        
-                # Validate contribution data
-                if public_contributions == 0 and private_contributions == 0:
-                    st.warning("No contributions found. If you have private repositories, make sure your token has the 'repo' scope.", 0)
+                with user_stats_info:
+                    formatted_date = user_stats.get("formatted_date")
+                    joined_since = user_stats.get("joined_since")
+                    github_days = user_stats.get("github_days")
+                    active_days = cont_stats.get("active_days")
+                    less_than_2_months_old = user_stats.get("less_than_2_months_old")
             
-                # Calculate contributions based on toggle
-                display_total = public_contributions
-                if show_private:
-                    display_total += private_contributions
-                    if private_contributions == 0:
-                        st.info("No private contributions found. If you have private repositories, verify your token permissions.")
+            
+                    col1, col2 = st.columns(2)
+                    col1.metric(
+                        label="Joined Github since",
+                        value= formatted_date,
+                        delta= joined_since,
+                        delta_color= "inverse" if less_than_2_months_old else "normal",
+                        border= True
+                    )
 
-                # Display summary metrics
-                col1, col2, col3 = st.columns(3, border=True)
-                col1.metric(
-                    "Total Contributions", 
-                    value= f"{display_total:,} commits",
-                    delta=f"Public: {public_contributions:,}" + (f" | Private: {private_contributions:,}" if show_private else ""),
-                    delta_color= "off" if display_total == 0 else "normal"
+                    col2.metric(
+                        label="Total days on GitHub",
+                        value= f"{github_days} days",
+                        delta= f"Active for: {active_days} days",
+                        delta_color= "off" if active_days < 7 else "normal",
+                        border= True
                     )
-                col2.metric(
-                    "Longest Streak", 
-                    value= f"{longest_streak} days",
-                    delta=f"Current Streak: {current_streak} days",
-                    delta_color= "off" if current_streak == 0 else "normal"
-                    )
-                col3.metric(
-                    "Most Productive Day",
-                    value= f"{highest_contribution_date}",
-                    delta=f"{highest_contribution} commits",
-                    delta_color="normal"
-                    )
+
+                    # --- Summary Stats ---
+                    # st.markdown("### Summary Stats")
+                    total_contributions = cont_stats.get("total_contributions", 0)
+                    public_contributions = cont_stats.get("public_contributions", 0)
+                    private_contributions = cont_stats.get("private_contributions", 0)
+                    highest_contribution = cont_stats.get("highest_contribution", 0)
+                    highest_contribution_date = cont_stats.get("highest_contribution_date", None)
+                    current_streak = cont_stats.get("current_streak", 0)
+                    longest_streak = cont_stats.get("longest_streak", 0)
+                    days = cont_stats.get("days", [])
+
+            
+                    # Validate contribution data
+                    if public_contributions == 0 and private_contributions == 0:
+                        st.warning("No contributions found. If you have private repositories, make sure your token has the 'repo' scope.", 0)
+                
+                    # Calculate contributions based on toggle
+                    display_total = public_contributions
+                    if show_private:
+                        display_total += private_contributions
+                        if private_contributions == 0:
+                            st.info("No private contributions found. If you have private repositories, verify your token permissions.")
+
+                    # Display summary metrics
+                    col1, col2, col3 = st.columns(3, border=True)
+                    col1.metric(
+                        "Total Contributions", 
+                        value= f"{display_total:,} commits",
+                        delta=f"Public: {public_contributions:,}" + (f" | Private: {private_contributions:,}" if show_private else ""),
+                        delta_color= "off" if display_total == 0 else "normal"
+                        )
+                    col2.metric(
+                        "Longest Streak", 
+                        value= f"{longest_streak} days",
+                        delta=f"Current Streak: {current_streak} days",
+                        delta_color= "off" if current_streak == 0 else "normal"
+                        )
+                    col3.metric(
+                        "Most Productive Day",
+                        value= f"{highest_contribution_date}",
+                        delta=f"{highest_contribution} commits",
+                        delta_color="normal"
+                        )
 
             # Prepare data for visualizations
             if not days:
@@ -136,8 +189,8 @@ def main():
                 yearly_contributions = chart_data.groupby('Year')['Contributions'].sum().round(1)  # Round to 1 decimal
 
                 st.markdown("### Growth and Statistics")
-                with st.container(border=True):
-                    col1, col2 = st.columns(2, border=True)
+                with st.container():
+                    col1, col2 = st.columns(2, border=True, vertical_alignment="center")
 
                     col1.markdown("### Yearly Growth")
                     col1.bar_chart(yearly_contributions, color=color)
@@ -164,7 +217,7 @@ def main():
             
             if repo_stats:
                 with st.container(border=True):
-                    col1, col2 = st.columns([3,1])
+                    col1, col2 = st.columns([3,1], vertical_alignment="center", gap="small")
                     # Sort languages by count and take top 6 languages
                     sorted_data = dict(sorted(repo_stats.items(), key=lambda x: x[1]['count'], reverse=True))
                     top_languages = dict(list(sorted_data.items())[:6])
