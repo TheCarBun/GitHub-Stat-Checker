@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 from github_stats import *
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 from util import load_css
 
 color = "#26a641"
@@ -191,11 +192,39 @@ def main():
                     # --- Contributions by Day of Week ---
                     col2.markdown("### By Day of Week")
                     with col2.container(border=True):
-                        # Add the Day column before grouping
-                        chart_data['Day'] = chart_data['Date'].dt.dayofweek
-                        day_of_week_data = chart_data.groupby("Day")['Contributions'].sum().round(1)
-                        day_of_week_data.index = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-                        st.bar_chart(day_of_week_data, color=color, horizontal=True)
+                        # Ensure the 'Date' column is properly converted to datetime
+                        chart_data["Date"] = pd.to_datetime(chart_data["Date"])
+                        chart_data["Day"] = chart_data["Date"].dt.day_name()
+
+                        # Aggregate contributions by day of the week
+                        day_totals = chart_data.groupby("Day")["Contributions"].sum()
+
+                        # Create ordered lists for plotting (reversed order for top-to-bottom display)
+                        correct_order = ["Sunday", "Saturday", "Friday", "Thursday", "Wednesday", "Tuesday", "Monday"]
+                        values = [day_totals.get(day, 0) for day in correct_order]
+
+                        # Create Plotly bar chart
+                        fig = go.Figure(go.Bar(
+                            x=values,
+                            y=correct_order,
+                            orientation='h',
+                            marker_color=color
+                        ))
+
+                        # Update layout for dark theme compatibility
+                        fig.update_layout(
+                            plot_bgcolor='rgba(0,0,0,0)',
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            font_color='white',
+                            showlegend=False,
+                            margin=dict(l=0, r=0, t=0, b=0),
+                            height=250,  # Reduce the height of the chart
+                            xaxis=dict(showgrid=True, gridcolor='rgba(128,128,128,0.2)'),
+                            yaxis=dict(showgrid=False)
+                        )
+
+                        # Display the Plotly chart
+                        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
             # Add Language Distribution
             st.markdown("### Programming Languages")
