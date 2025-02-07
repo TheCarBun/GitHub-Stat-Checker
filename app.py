@@ -218,7 +218,7 @@ def main():
                             font_color='white',
                             showlegend=False,
                             margin=dict(l=0, r=0, t=0, b=0),
-                            height=250,  # Reduce the height of the chart
+                            height=150,  # Reduce the height of the chart
                             xaxis=dict(showgrid=True, gridcolor='rgba(128,128,128,0.2)'),
                             yaxis=dict(showgrid=False)
                         )
