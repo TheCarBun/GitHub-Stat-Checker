@@ -39,6 +39,20 @@ def main():
         
         button_pressed = form.button("Track", type="primary")
 
+        with st.container(border=True):
+            st.page_link(
+                "app.py", 
+                label="Overview", 
+                icon="✨",
+                help="ℹ️ Check your GitHub stats and contributions."
+                )
+            st.page_link(
+                "./pages/predictions.py", 
+                label="Predictions", 
+                icon="⚡",
+                help="ℹ️ Predict your GitHub contributions."
+                )
+
     
     if username and token and button_pressed:
         # Fetch data
