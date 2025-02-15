@@ -40,7 +40,7 @@ def format_date_ddmmyyyy(date:str) -> str:
         str: The formatted date string (e.g., "7th Feb, 2025").
     """
     date_obj = datetime.strptime(date, '%Y-%m-%d')
-    formated_date = date_obj.strftime("{day} %b, %Y").replace("{day}", str(date_obj.day) + ("st" if date_obj.day in [1, 21, 31] else "nd" if date_obj.day == 2 else "rd" if date_obj.day == 3 else "th"))
+    formated_date = date_obj.strftime("{day} %b, %Y").replace("{day}", str(date_obj.day) + ("st" if date_obj.day in [1, 21, 31] else "nd" if date_obj.day in [2, 22] else "rd" if date_obj.day in [3, 23] else "th"))
     return formated_date
 
 def format_iso_date(iso_date:str) -> str:
@@ -54,7 +54,7 @@ def format_iso_date(iso_date:str) -> str:
         str: The formatted date string (e.g., "7th Feb, 202
     """
     dt = datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%SZ")
-    return dt.strftime("{day} %b, %Y").replace("{day}", str(dt.day) + ("st" if dt.day in [1, 21, 31] else "nd" if dt.day == 2 else "rd" if dt.day == 3 else "th"))
+    return dt.strftime("{day} %b, %Y").replace("{day}", str(dt.day) + ("st" if dt.day in [1, 21, 31] else "nd" if dt.day  in [2, 22] else "rd" if dt.day in [3, 23] else "th"))
 
 def is_less_than_2_months_old(iso_date:str) -> bool:
     """
