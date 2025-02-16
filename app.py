@@ -146,9 +146,9 @@ def main():
                         delta_color= "off" if display_total == 0 else "normal"
                         )
                     col2.metric(
-                        "🔥 Longest Streak", 
-                        value= f"{longest_streak} days",
-                        delta=f"Current Streak: {current_streak} days",
+                        "Current Streak", 
+                        value= f"{'☹️' if current_streak==0 else '🔥'} {current_streak} days",
+                        delta=f"Longest: {longest_streak} days",
                         delta_color= "off" if current_streak == 0 else "normal"
                         )
                     col3.metric(
