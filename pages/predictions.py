@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import datetime
+import pandas as pd
 from fetch_github_data import fetch_data_for_duration
 from process_github_data import analyze_contributions
 from util import predict_days_to_milestone, get_milestone_dates, format_date_ddmmyyyy
@@ -156,7 +157,53 @@ if username and token and button_pressed:
                 help="Estimated total active days by year end at current rate",
                 border=True
             )
+
+        # Visualizations
+        st.markdown("### 📈 Activity Visualizations")
+        col1, col2 = st.columns(2, gap="medium")
+
+        # Prepare data for visualizations
+        contributions_data = []
+        for week in current_year_data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]:
+            for day in week["contributionDays"]:
+                contributions_data.append({
+                    "date": datetime.strptime(day["date"], "%Y-%m-%d"),
+                    "contributions": day["contributionCount"]
+                })
         
+        chart_data = pd.DataFrame(contributions_data)
+        
+        # Yearly Growth
+        with col1:
+            st.markdown("#### Yearly Growth")
+            yearly_contributions = chart_data.groupby(chart_data['date'].dt.year)['contributions'].sum()
+            st.bar_chart(yearly_contributions, use_container_width=True)
+            
+            # Monthly Contributions
+            st.markdown("#### Monthly Contributions")
+            monthly_contributions = chart_data.groupby(chart_data['date'].dt.strftime('%B'))['contributions'].sum()
+            # Reorder months chronologically
+            month_order = ['January', 'February', 'March', 'April', 'May', 'June', 
+                          'July', 'August', 'September', 'October', 'November', 'December']
+            monthly_contributions = monthly_contributions.reindex(month_order)
+            st.bar_chart(monthly_contributions, use_container_width=True)
+
+        # Activity Patterns
+        with col2:
+            st.markdown("#### Weekday vs. Weekend")
+            weekend_data = chart_data.assign(
+                is_weekend=chart_data['date'].dt.dayofweek.isin([5, 6])
+            ).groupby('is_weekend')['contributions'].sum()
+            weekend_data.index = ['Weekdays', 'Weekends']
+            st.bar_chart(weekend_data, use_container_width=True)
+            
+            st.markdown("#### Daily Activity Pattern")
+            daily_data = chart_data.groupby(chart_data['date'].dt.day_name())['contributions'].sum()
+            # Reorder days of week
+            day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            daily_data = daily_data.reindex(day_order)
+            st.bar_chart(daily_data, use_container_width=True)
+
         # Advanced Predictions
         with st.container():
             st.markdown("### 🔮 Advanced Activity Analysis")
