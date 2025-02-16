@@ -3,6 +3,13 @@ from datetime import datetime
 from fetch_github_data import fetch_data_for_duration
 from process_github_data import analyze_contributions
 from util import predict_days_to_milestone, get_milestone_dates, format_date_ddmmyyyy
+from github_activity_predictions import (
+    predict_long_term_activity,
+    predict_burnout,
+    predict_consistency,
+    predict_account_longevity,
+    predict_effective_rate
+)
 
 st.set_page_config(
     page_title = "GitHub Stat Checker",
@@ -132,6 +139,68 @@ if username and token and button_pressed:
             help="Total predicted active days this year, if user continues to contribute at the same rate",
             border=True
         )
+
+    # Advanced Predictions
+    with st.container():
+        st.markdown("#### :material/analytics: **Advanced Activity Analysis**")
+        
+        # Calculate advanced predictions
+        long_term = predict_long_term_activity(
+            total_contributions,
+            total_days,
+            current_year_stats.get("total_contributions", 0),
+            active_days
+        )
+        
+        consistency_score, consistency_class = predict_consistency(active_days, total_days)
+        
+        effective_rate = predict_effective_rate(total_contributions, active_days, total_days)
+        
+        # Get historical active days for burnout prediction
+        active_days_by_year = [
+            whole_year_stats.get("active_days", 0),  # Last year
+            current_year_stats.get("active_days", 0)  # Current year
+        ]
+        burnout_prediction = predict_burnout(active_days_by_year)
+        longevity_prediction = predict_account_longevity(active_days_by_year)
+        
+        # Display advanced metrics
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.metric(
+                label="Lifetime Contribution Rate",
+                value=f"{long_term.lifetime_rate:.2f} commits/day",
+                delta=long_term.trend,
+                help="Average number of contributions per day over account lifetime",
+                border=True
+            )
+            
+            st.metric(
+                label="Contribution Consistency",
+                value=f"{consistency_score:.1f}%",
+                delta=consistency_class,
+                help="Measure of how consistently you contribute (higher is better)",
+                border=True
+            )
+            
+            st.metric(
+                label="Effective Contribution Rate",
+                value=f"{effective_rate:.2f} commits/active day",
+                help="Average contributions per active day, weighted by activity frequency",
+                border=True
+            )
+        
+        with col2:
+            st.info(
+                f"**Activity Trend Analysis**  \n{burnout_prediction}",
+                icon="📈"
+            )
+            
+            st.info(
+                f"**Account Longevity Prediction**  \n{longevity_prediction}",
+                icon="⏳"
+            )
 
     # Milestone goals
     milestones = [100, 500, 1000, 2000, 5000, 10000]
