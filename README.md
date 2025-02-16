@@ -1,4 +1,5 @@
-![image](https://github.com/user-attachments/assets/b018c10a-db2b-4c56-9832-6cafda16ed1f)
+![image](https://github.com/user-attachments/assets/c3ed1d8b-4351-4f5c-955d-442b2f14ca54)
+
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/TheCarBun/GitHub-Stat-Checker?style=for-the-badge) 
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-raw/TheCarBun/GitHub-Stat-Checker?style=for-the-badge) 
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr-raw/TheCarBun/GitHub-Stat-Checker?style=for-the-badge) 
