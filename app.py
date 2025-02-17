@@ -155,7 +155,7 @@ def main():
                         "Most Productive Day",
                         value= f"{highest_contribution} commits",
                         delta=f"{highest_contribution_date}",
-                        delta_color="normal"
+                        delta_color="off" if highest_contribution == 0 else "normal"
                         )
                     
                     # Days on GitHub & Active days

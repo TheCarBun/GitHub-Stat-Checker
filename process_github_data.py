@@ -31,10 +31,10 @@ def process_contribution_data(data: dict):
         try:
             highest_day = max(days, key=lambda day: day['contributionCount'])
             highest_contribution = highest_day['contributionCount']
-            highest_contribution_date = format_date_ddmmyyyy(highest_day['date'])
+            highest_contribution_date = format_date_ddmmyyyy(highest_day['date']) if highest_contribution > 0 else 'No activity found'
         except (ValueError, KeyError):
             highest_contribution = 0
-            highest_contribution_date = None
+            highest_contribution_date = 'No activity found'
         
         current_streak = 0
         longest_streak = 0

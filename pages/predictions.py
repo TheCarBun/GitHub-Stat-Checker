@@ -79,16 +79,16 @@ if username and token and button_pressed:
         last_dec31st_str = last_dec31st.strftime("%Y-%m-%d")
 
         # Fetch data for both periods
-    year_data = fetch_data_for_duration(
-        username, 
-        token,
+        year_data = fetch_data_for_duration(
+            username, 
+            token,
             from_date=last_jan1st_str,
             to_date=last_dec31st_str
         )
 
-    current_year_data = fetch_data_for_duration(
-        username, 
-        token,
+        current_year_data = fetch_data_for_duration(
+            username, 
+            token,
             from_date=current_jan1st_str,
             to_date=today_str
         )
@@ -97,9 +97,9 @@ if username and token and button_pressed:
             st.error("Failed to fetch GitHub data. Please check your username and token.")
             st.stop()
     
-    # Process data
-    whole_year_stats = analyze_contributions(year_data)
-    current_year_stats = analyze_contributions(current_year_data)
+        # Process data
+        whole_year_stats = analyze_contributions(year_data)
+        current_year_stats = analyze_contributions(current_year_data)
 
         # Calculate basic metrics
         total_days = (today - current_jan1st).days + 1
@@ -114,7 +114,7 @@ if username and token and button_pressed:
         # Calculate growth rates safely
         if contribution_rate_ly > 0:
             growth_rate = ((contribution_rate - contribution_rate_ly) / contribution_rate_ly) * 100
-    else:
+        else:
             growth_rate = 0 if contribution_rate == 0 else 100
         
         # Calculate predictions safely
@@ -129,217 +129,217 @@ if username and token and button_pressed:
         predicted_future_active_days = active_rate * remaining_days
         
         # Display predictions
-    with st.container():
+        with st.container():
             st.markdown("### 📊 Predictions & Trends")
 
-        col1, col2, col3 = st.columns(3)
+            col1, col2, col3 = st.columns(3)
 
-        col1.metric(
-            label="Contribution Rate Growth",
+            col1.metric(
+                label="Contribution Rate Growth",
                 value=f"{growth_rate:.1f}%",
                 delta="+Increasing" if growth_rate > 0 else "-Decreasing" if growth_rate < 0 else "Stable",
-            help="Growth in contribution rate compared to last year",
-            border=True
-        )
+                help="Growth in contribution rate compared to last year",
+                border=True
+            )
 
-        col2.metric(
+            col2.metric(
                 label="Predicted Year-End Contributions",
                 value=f"{int(total_contributions + predicted_future_contributions)} commits",
                 delta=f"+{int(predicted_future_contributions)} commits",
                 help="Estimated total commits by year end at current rate",
-            border=True
-        )
+                border=True
+            )
 
-        col3.metric(
+            col3.metric(
                 label="Predicted Active Days",
                 value=f"{int(active_days + predicted_future_active_days)} days",
                 delta=f"+{int(predicted_future_active_days)} days",
                 help="Estimated total active days by year end at current rate",
-            border=True
-        )
-
-        # Visualizations
-        st.markdown("### 📈 Activity Visualizations")
-        col1, col2 = st.columns(2, gap="medium")
-
-        # Prepare data for visualizations
-        contributions_data = []
-        for week in current_year_data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]:
-            for day in week["contributionDays"]:
-                contributions_data.append({
-                    "date": datetime.strptime(day["date"], "%Y-%m-%d"),
-                    "contributions": day["contributionCount"]
-                })
-        
-        chart_data = pd.DataFrame(contributions_data)
-        
-        # Yearly Growth
-        with col1:
-            st.markdown("#### Yearly Growth")
-            yearly_contributions = chart_data.groupby(chart_data['date'].dt.year)['contributions'].sum()
-            st.bar_chart(yearly_contributions, use_container_width=True)
-            
-            # Monthly Contributions
-            st.markdown("#### Monthly Contributions")
-            if not chart_data.empty:
-                # Resample by month and ensure chronological order
-                monthly_contributions = chart_data.resample('M', on='date')['contributions'].sum()
-                
-                # Format month labels
-                monthly_contributions.index = monthly_contributions.index.strftime('%B %Y')
-                
-                # Create responsive container for the chart
-                with st.container():
-                    st.bar_chart(
-                        monthly_contributions,
-                        use_container_width=True,
-                    )
-                    
-                    # Add total contributions for the month
-                    st.caption(f"Total contributions this month: {monthly_contributions.iloc[-1] if len(monthly_contributions) > 0 else 0}")
-            else:
-                st.info("No contribution data available for monthly visualization")
-
-        # Activity Patterns
-        with col2:
-            st.markdown("#### Weekday vs. Weekend")
-            weekend_data = chart_data.assign(
-                is_weekend=chart_data['date'].dt.dayofweek.isin([5, 6])
-            ).groupby('is_weekend')['contributions'].sum()
-            weekend_data.index = ['Weekdays', 'Weekends']
-            st.bar_chart(weekend_data, use_container_width=True)
-            
-            st.markdown("#### Daily Activity Pattern")
-            daily_data = chart_data.groupby(chart_data['date'].dt.day_name())['contributions'].sum()
-            # Reorder days of week
-            day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-            daily_data = daily_data.reindex(day_order)
-            st.bar_chart(daily_data, use_container_width=True)
-
-        # Advanced Predictions
-        with st.container():
-            st.markdown("### 🔮 Advanced Activity Analysis")
-            
-            # Calculate advanced metrics
-            long_term = predict_long_term_activity(
-                total_contributions,
-                total_days,
-                current_year_stats.get("total_contributions", 0),
-                active_days
+                border=True
             )
+
+            # Visualizations
+            st.markdown("### 📈 Activity Visualizations")
+            col1, col2 = st.columns(2, gap="medium")
+
+            # Prepare data for visualizations
+            contributions_data = []
+            for week in current_year_data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]:
+                for day in week["contributionDays"]:
+                    contributions_data.append({
+                        "date": datetime.strptime(day["date"], "%Y-%m-%d"),
+                        "contributions": day["contributionCount"]
+                    })
             
-            consistency_score, consistency_class = predict_consistency(active_days, total_days)
+            chart_data = pd.DataFrame(contributions_data)
             
-            effective_rate = predict_effective_rate(
-                total_contributions,
-                active_days,
-                total_days
-            )
-            
-            # Historical data for burnout prediction
-            active_days_by_year = [
-                current_year_stats.get("active_days", 0),
-                whole_year_stats.get("active_days", 0)
-            ]
-            
-            burnout_prediction = predict_burnout(active_days_by_year)
-            longevity_prediction = predict_account_longevity(active_days_by_year)
-            
-            # Display advanced metrics
-            col1, col2 = st.columns(2)
-            
+            # Yearly Growth
             with col1:
-                st.metric(
-                    label="Lifetime Contribution Rate",
-                    value=f"{long_term.lifetime_rate:.2f} commits/day",
-                    delta=long_term.trend.title(),
-                    help="Average contributions per day over account lifetime",
-                    border=True
-                )
+                st.markdown("#### Yearly Growth")
+                yearly_contributions = chart_data.groupby(chart_data['date'].dt.year)['contributions'].sum()
+                st.bar_chart(yearly_contributions, use_container_width=True)
                 
-                st.metric(
-                    label="Contribution Consistency",
-                    value=f"{consistency_score:.1f}%",
-                    delta=consistency_class,
-                    help="How consistently you contribute (higher is better)",
-                    border=True
-                )
-                
-                st.metric(
-                    label="Effective Contribution Rate",
-                    value=f"{effective_rate:.2f} commits/active day",
-                    help="Average contributions per active day, weighted by activity",
-                    border=True
-                )
-            
+                # Monthly Contributions
+                st.markdown("#### Monthly Contributions")
+                if not chart_data.empty:
+                    # Resample by month and ensure chronological order
+                    monthly_contributions = chart_data.resample('M', on='date')['contributions'].sum()
+                    
+                    # Format month labels
+                    monthly_contributions.index = monthly_contributions.index.strftime('%B %Y')
+                    
+                    # Create responsive container for the chart
+                    with st.container():
+                        st.bar_chart(
+                            monthly_contributions,
+                            use_container_width=True,
+                        )
+                        
+                        # Add total contributions for the month
+                        st.caption(f"Total contributions this month: {monthly_contributions.iloc[-1] if len(monthly_contributions) > 0 else 0}")
+                else:
+                    st.info("No contribution data available for monthly visualization")
+
+            # Activity Patterns
             with col2:
-                st.info(
-                    f"**Activity Trend Analysis**\n{burnout_prediction}",
-                    icon="📈"
-                )
+                st.markdown("#### Weekday vs. Weekend")
+                weekend_data = chart_data.assign(
+                    is_weekend=chart_data['date'].dt.dayofweek.isin([5, 6])
+                ).groupby('is_weekend')['contributions'].sum()
+                weekend_data.index = ['Weekdays', 'Weekends']
+                st.bar_chart(weekend_data, use_container_width=True)
                 
-                st.info(
-                    f"**Account Longevity Prediction**\n{longevity_prediction}",
-                    icon="⏳"
-                )
-        
-        # Milestones
-        with st.container():
-            st.markdown("### 🎯 Milestone Predictions")
-            
-            if total_contributions > 0:
-                milestones = [100, 500, 1000, 2000, 5000, 10000]
+                st.markdown("#### Daily Activity Pattern")
+                daily_data = chart_data.groupby(chart_data['date'].dt.day_name())['contributions'].sum()
+                # Reorder days of week
+                day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+                daily_data = daily_data.reindex(day_order)
+                st.bar_chart(daily_data, use_container_width=True)
+
+            # Advanced Predictions
+            with st.container():
+                st.markdown("### 🔮 Advanced Activity Analysis")
                 
-                # Calculate milestone predictions
-                milestone_predictions = {
-                    milestone: predict_days_to_milestone(
-                        total_contributions,
-                        milestone,
-                        max(0.1, contribution_rate)  # Ensure non-zero rate
-                    ) for milestone in milestones
-                }
-                
-                # Get milestone dates
-                contributions = current_year_data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]
-                milestone_dates = get_milestone_dates(
-                    milestones,
-                    contributions,
+                # Calculate advanced metrics
+                long_term = predict_long_term_activity(
                     total_contributions,
-                    max(0.1, contribution_rate)  # Ensure non-zero rate
+                    total_days,
+                    current_year_stats.get("total_contributions", 0),
+                    active_days
                 )
                 
-                # Display milestones
+                consistency_score, consistency_class = predict_consistency(active_days, total_days)
+                
+                effective_rate = predict_effective_rate(
+                    total_contributions,
+                    active_days,
+                    total_days
+                )
+                
+                # Historical data for burnout prediction
+                active_days_by_year = [
+                    current_year_stats.get("active_days", 0),
+                    whole_year_stats.get("active_days", 0)
+                ]
+                
+                burnout_prediction = predict_burnout(active_days_by_year)
+                longevity_prediction = predict_account_longevity(active_days_by_year)
+                
+                # Display advanced metrics
                 col1, col2 = st.columns(2)
                 
-                for i, (milestone, days) in enumerate(milestone_predictions.items()):
-                    col = col1 if i % 2 == 0 else col2
+                with col1:
+                    st.metric(
+                        label="Lifetime Contribution Rate",
+                        value=f"{long_term.lifetime_rate:.2f} commits/day",
+                        delta=long_term.trend.title(),
+                        help="Average contributions per day over account lifetime",
+                        border=True
+                    )
                     
-                    if total_contributions >= milestone:
-                        # Achieved milestone
-                        col.metric(
-                            label=f"✅ {milestone:,} Commits",
-                            value="Achieved!",
-                            delta="Complete",
-                            help=f"You've reached the {milestone:,} commits milestone",
-                            border=True
-                        )
-                    else:
-                        # Future milestone
-                        progress = (total_contributions / milestone) * 100
-                        eta_date = milestone_dates.get(milestone)
+                    st.metric(
+                        label="Contribution Consistency",
+                        value=f"{consistency_score:.1f}%",
+                        delta=consistency_class,
+                        help="How consistently you contribute (higher is better)",
+                        border=True
+                    )
+                    
+                    st.metric(
+                        label="Effective Contribution Rate",
+                        value=f"{effective_rate:.2f} commits/active day",
+                        help="Average contributions per active day, weighted by activity",
+                        border=True
+                    )
+                
+                with col2:
+                    st.info(
+                        f"**Activity Trend Analysis**\n{burnout_prediction}",
+                        icon="📈"
+                    )
+                    
+                    st.info(
+                        f"**Account Longevity Prediction**\n{longevity_prediction}",
+                        icon="⏳"
+                    )
+            
+            # Milestones
+            with st.container():
+                st.markdown("### 🎯 Milestone Predictions")
+                
+                if total_contributions > 0:
+                    milestones = [100, 500, 1000, 2000, 5000, 10000]
+                    
+                    # Calculate milestone predictions
+                    milestone_predictions = {
+                        milestone: predict_days_to_milestone(
+                            total_contributions,
+                            milestone,
+                            max(0.1, contribution_rate)  # Ensure non-zero rate
+                        ) for milestone in milestones
+                    }
+                    
+                    # Get milestone dates
+                    contributions = current_year_data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]
+                    milestone_dates = get_milestone_dates(
+                        milestones,
+                        contributions,
+                        total_contributions,
+                        max(0.1, contribution_rate)  # Ensure non-zero rate
+                    )
+                    
+                    # Display milestones
+                    col1, col2 = st.columns(2)
+                    
+                    for i, (milestone, days) in enumerate(milestone_predictions.items()):
+                        col = col1 if i % 2 == 0 else col2
                         
-                        col.metric(
-                            label=f"🎯 {milestone:,} Commits",
-                            value=f"{int(days)} days" if days != float('inf') else "Not projected",
-                            delta=f"ETA: {format_date_ddmmyyyy(eta_date)}" if eta_date else None,
-                            help=f"Progress: {progress:.1f}% ({total_contributions:,}/{milestone:,})",
-                            border=True
-                        )
-                        
-                        if progress > 0:
-                            col.progress(min(100, progress) / 100, text=f"{progress:.1f}%")
-            else:
-                st.warning("No contributions found yet. Start contributing to see milestone predictions!")
+                        if total_contributions >= milestone:
+                            # Achieved milestone
+                            col.metric(
+                                label=f"✅ {milestone:,} Commits",
+                                value="Achieved!",
+                                delta="Complete",
+                                help=f"You've reached the {milestone:,} commits milestone",
+                                border=True
+                            )
+                        else:
+                            # Future milestone
+                            progress = (total_contributions / milestone) * 100
+                            eta_date = milestone_dates.get(milestone)
+                            
+                            col.metric(
+                                label=f"🎯 {milestone:,} Commits",
+                                value=f"{int(days)} days" if days != float('inf') else "Not projected",
+                                delta=f"ETA: {format_date_ddmmyyyy(eta_date)}" if eta_date else None,
+                                help=f"Progress: {progress:.1f}% ({total_contributions:,}/{milestone:,})",
+                                border=True
+                            )
+                            
+                            if progress > 0:
+                                col.progress(min(100, progress) / 100, text=f"{progress:.1f}%")
+                else:
+                    st.warning("No contributions found yet. Start contributing to see milestone predictions!")
                 
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
