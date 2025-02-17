@@ -1,5 +1,5 @@
 """
-Unit tests for GitHub activity prediction functions.
+Unit tests for GitHub activity prediction functions and visualizations.
 """
 
 import unittest
@@ -14,6 +14,10 @@ from github_activity_predictions import (
     predict_milestone,
     run_all_predictions
 )
+import pandas as pd
+from unittest.mock import patch, MagicMock
+import requests
+from fetch_repository_data import fetch_repository_details, get_user_repositories
 
 class TestGitHubPredictions(unittest.TestCase):
     def setUp(self):
@@ -89,6 +93,49 @@ class TestGitHubPredictions(unittest.TestCase):
         incomplete_data = {"created_at": "2020-01-01"}
         result = run_all_predictions(incomplete_data)
         self.assertIn('error', result)
+
+class TestRepositoryData(unittest.TestCase):
+    # ... existing code ...
+
+class TestVisualizationData(unittest.TestCase):
+    def setUp(self):
+        # Sample contribution data
+        self.sample_dates = [
+            "2024-01-01", "2024-01-15", 
+            "2024-02-01", "2024-02-15",
+            "2024-03-01", "2024-03-15"
+        ]
+        self.sample_contributions = [5, 3, 4, 6, 2, 8]
+        
+        # Create test DataFrame
+        self.test_data = pd.DataFrame({
+            'date': [datetime.strptime(date, "%Y-%m-%d") for date in self.sample_dates],
+            'contributions': self.sample_contributions
+        })
+    
+    def test_monthly_contributions_aggregation(self):
+        """Test that monthly contributions are correctly aggregated"""
+        monthly_data = self.test_data.resample('M', on='date')['contributions'].sum()
+        
+        # Verify correct monthly totals
+        self.assertEqual(monthly_data['2024-01-31'], 8)  # January total
+        self.assertEqual(monthly_data['2024-02-29'], 10)  # February total
+        self.assertEqual(monthly_data['2024-03-31'], 10)  # March total
+        
+        # Verify all months are present
+        self.assertEqual(len(monthly_data), 3)
+        
+        # Verify chronological order
+        self.assertTrue(all(monthly_data.index[i] <= monthly_data.index[i+1] 
+                          for i in range(len(monthly_data)-1)))
+    
+    def test_monthly_contributions_empty_data(self):
+        """Test handling of empty contribution data"""
+        empty_data = pd.DataFrame(columns=['date', 'contributions'])
+        monthly_data = empty_data.resample('M', on='date')['contributions'].sum()
+        
+        # Verify empty result
+        self.assertEqual(len(monthly_data), 0)
 
 if __name__ == '__main__':
     unittest.main() 

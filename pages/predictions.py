@@ -58,7 +58,7 @@ with st.sidebar:
             label="Repository Details",
             icon="📊",
             help="View detailed repository statistics."
-        )
+            )
 
 
 if username and token and button_pressed:
@@ -79,42 +79,42 @@ if username and token and button_pressed:
         last_dec31st_str = last_dec31st.strftime("%Y-%m-%d")
 
         # Fetch data for both periods
-        year_data = fetch_data_for_duration(
-            username,
-            token,
+    year_data = fetch_data_for_duration(
+        username, 
+        token,
             from_date=last_jan1st_str,
             to_date=last_dec31st_str
         )
 
-        current_year_data = fetch_data_for_duration(
-            username,
-            token,
+    current_year_data = fetch_data_for_duration(
+        username, 
+        token,
             from_date=current_jan1st_str,
             to_date=today_str
         )
-        
+    
         if not year_data or not current_year_data:
             st.error("Failed to fetch GitHub data. Please check your username and token.")
             st.stop()
-        
-        # Process data
-        whole_year_stats = analyze_contributions(year_data)
-        current_year_stats = analyze_contributions(current_year_data)
-        
+    
+    # Process data
+    whole_year_stats = analyze_contributions(year_data)
+    current_year_stats = analyze_contributions(current_year_data)
+
         # Calculate basic metrics
         total_days = (today - current_jan1st).days + 1
         remaining_days = max(0, 365 - total_days)
-        
+    
         contribution_rate_ly = whole_year_stats.get('contribution_rate', 0)
         active_days_ly = whole_year_stats.get('active_days', 0)
         total_contributions = current_year_stats.get('total_contributions', 0)
         contribution_rate = current_year_stats.get('contribution_rate', 0)
         active_days = current_year_stats.get('active_days', 0)
-        
+
         # Calculate growth rates safely
         if contribution_rate_ly > 0:
             growth_rate = ((contribution_rate - contribution_rate_ly) / contribution_rate_ly) * 100
-        else:
+    else:
             growth_rate = 0 if contribution_rate == 0 else 100
         
         # Calculate predictions safely
@@ -129,34 +129,34 @@ if username and token and button_pressed:
         predicted_future_active_days = active_rate * remaining_days
         
         # Display predictions
-        with st.container():
+    with st.container():
             st.markdown("### 📊 Predictions & Trends")
-            
-            col1, col2, col3 = st.columns(3)
-            
-            col1.metric(
-                label="Contribution Rate Growth",
+
+        col1, col2, col3 = st.columns(3)
+
+        col1.metric(
+            label="Contribution Rate Growth",
                 value=f"{growth_rate:.1f}%",
                 delta="+Increasing" if growth_rate > 0 else "-Decreasing" if growth_rate < 0 else "Stable",
-                help="Growth in contribution rate compared to last year",
-                border=True
-            )
-            
-            col2.metric(
+            help="Growth in contribution rate compared to last year",
+            border=True
+        )
+
+        col2.metric(
                 label="Predicted Year-End Contributions",
                 value=f"{int(total_contributions + predicted_future_contributions)} commits",
                 delta=f"+{int(predicted_future_contributions)} commits",
                 help="Estimated total commits by year end at current rate",
-                border=True
-            )
-            
-            col3.metric(
+            border=True
+        )
+
+        col3.metric(
                 label="Predicted Active Days",
                 value=f"{int(active_days + predicted_future_active_days)} days",
                 delta=f"+{int(predicted_future_active_days)} days",
                 help="Estimated total active days by year end at current rate",
-                border=True
-            )
+            border=True
+        )
 
         # Visualizations
         st.markdown("### 📈 Activity Visualizations")
@@ -181,12 +181,24 @@ if username and token and button_pressed:
             
             # Monthly Contributions
             st.markdown("#### Monthly Contributions")
-            monthly_contributions = chart_data.groupby(chart_data['date'].dt.strftime('%B'))['contributions'].sum()
-            # Reorder months chronologically
-            month_order = ['January', 'February', 'March', 'April', 'May', 'June', 
-                          'July', 'August', 'September', 'October', 'November', 'December']
-            monthly_contributions = monthly_contributions.reindex(month_order)
-            st.bar_chart(monthly_contributions, use_container_width=True)
+            if not chart_data.empty:
+                # Resample by month and ensure chronological order
+                monthly_contributions = chart_data.resample('M', on='date')['contributions'].sum()
+                
+                # Format month labels
+                monthly_contributions.index = monthly_contributions.index.strftime('%B %Y')
+                
+                # Create responsive container for the chart
+                with st.container():
+                    st.bar_chart(
+                        monthly_contributions,
+                        use_container_width=True,
+                    )
+                    
+                    # Add total contributions for the month
+                    st.caption(f"Total contributions this month: {monthly_contributions.iloc[-1] if len(monthly_contributions) > 0 else 0}")
+            else:
+                st.info("No contribution data available for monthly visualization")
 
         # Activity Patterns
         with col2:
