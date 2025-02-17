@@ -25,14 +25,24 @@ st.title("GitHub Repository Details")
 
 with st.sidebar:
     form = st.container(border=True)
-    username = form.text_input("Enter GitHub Username:")
-    token = form.text_input(
-        "Enter GitHub Personal Access Token:",
-        type="password",
-        help="Help: [Create Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)"
-    )
+    # Initialize session state for username and token if they don't exist
+    if 'username' not in st.session_state:
+        st.session_state.username = ''
+    if 'token' not in st.session_state:
+        st.session_state.token = ''
+    if 'show_private' not in st.session_state:
+        st.session_state.show_private = True
+
+    # Use session state for form fields
+    username = form.text_input("Enter GitHub Username:", value=st.session_state.username, key='username')
+    token = form.text_input("Enter GitHub Personal Access Token:", value=st.session_state.token, type="password", key='token', help="Help: [Create Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)")
+    show_private = form.toggle("Show Private Contributions", value=st.session_state.show_private, key='show_private', help="Toggle to show/hide private contributions in stats. Requires a token with 'repo' scope.")
     
-    button_pressed = form.button("Fetch Repositories", type="primary")
+    # Add warning about token permissions if showing private contributions
+    if show_private:
+        form.info("To view private contributions, make sure your token has the 'repo' scope enabled.", icon="ℹ️")
+    
+    button_pressed = form.button("Track", type="primary")
 
     with st.container(border=True):
         st.page_link(

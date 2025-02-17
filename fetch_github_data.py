@@ -41,7 +41,17 @@ def fetch_data_for_duration(username: str, token: str, from_date: str, to_date: 
     try:
         response = requests.post(BASE_URL, json={"query": query}, headers=headers)
         response.raise_for_status()
-        return response.json()
+        result = response.json()
+        
+        # Check for GraphQL errors
+        if "errors" in result:
+            return {"errors": result["errors"][0]["message"]}
+            
+        # Check if user data exists
+        if not result.get("data") or not result["data"].get("user"):
+            return {"errors": "User not found or invalid token"}
+            
+        return result
     except requests.exceptions.RequestException as e:
         return {"errors": str(e)}
 
@@ -86,7 +96,17 @@ def fetch_user_data(username: str, token: str):
     try:
         response = requests.post(BASE_URL, json={"query": query}, headers=headers)
         response.raise_for_status()
-        return response.json()
+        result = response.json()
+        
+        # Check for GraphQL errors
+        if "errors" in result:
+            return {"errors": result["errors"][0]["message"]}
+            
+        # Check if user data exists
+        if not result.get("data") or not result["data"].get("user"):
+            return {"errors": "User not found or invalid token"}
+            
+        return result
     except requests.exceptions.RequestException as e:
         return {"errors": str(e)}
 

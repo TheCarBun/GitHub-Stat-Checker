@@ -11,6 +11,23 @@ def process_contribution_data(data: dict):
     Returns:
         dict: Processed contribution data including total contributions, highest contribution, streaks, and active days.
     """
+    # Check for errors in the data
+    if not data or "errors" in data:
+        error_msg = data.get("errors") if data and "errors" in data else "Invalid data format"
+        print(f"Error processing contribution data: {error_msg}")
+        return {
+            "errors": error_msg,
+            "total_contributions": 0,
+            "public_contributions": 0,
+            "private_contributions": 0,
+            "highest_contribution": 0,
+            "highest_contribution_date": "No activity found",
+            "current_streak": 0,
+            "longest_streak": 0,
+            "active_days": 0,
+            "days": []
+        }
+
     try:
         contributions_collection = data['data']['user']['contributionsCollection']
         calendar = contributions_collection['contributionCalendar']
@@ -70,13 +87,7 @@ def process_contribution_data(data: dict):
     except (KeyError, TypeError) as e:
         print(f"Error processing contribution data: {str(e)}")
         return {
-            "total_contributions": 0,
-            "public_contributions": 0,
-            "private_contributions": 0,
-            "highest_contribution": 0,
-            "current_streak": 0,
-            "longest_streak": 0,
-            "days": []
+            "errors": str(e)
         }
 
 def process_language_data(data: dict):
