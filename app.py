@@ -301,6 +301,17 @@ def main():
                     col1.markdown("### Yearly Growth")
                     col1.bar_chart(yearly_contributions, color=color)
 
+                    # Display monthly growth visualization in Jan-2023 format
+                    with st.container(border=True):
+                        st.markdown("### Monthly Growth")
+                        # Convert dates to datetime format
+                        chart_data["Date"] = pd.to_datetime(chart_data["Date"])
+                        # Extract Year-Month and sum contributions
+                        chart_data["Year-Month"] = chart_data["Date"].dt.strftime("%Y-%m")
+                        monthly_data = chart_data.groupby("Year-Month")["Contributions"].sum().reset_index()
+
+                        st.bar_chart(monthly_data.set_index("Year-Month"), color=color, height=200)
+
                     # --- Weekday vs. Weekend Contributions ---
                     col2.markdown("### Weekday vs. Weekend")
                     with col2.container(border=True):
