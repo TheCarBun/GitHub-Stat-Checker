@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit import session_state as sst
 from datetime import datetime
 from fetch_github_data import fetch_data_for_duration
 from process_github_data import analyze_contributions
@@ -18,19 +19,29 @@ st.set_page_config(
         "Report a bug": "https://github.com/TheCarBun/GitHub-Stat-Checker/issues",
     }
 )
+
+# Initializing session state
+if 'username' not in sst:
+        sst.username = ''
+if 'token' not in sst:
+    sst.token = ''
+if 'button_pressed' not in sst:
+    sst.button_pressed = False
+
 # Title and input
 st.title("GitHub Contribution Tracker")
 with st.sidebar:
     form = st.container(border=True)
-    username = form.text_input("Enter GitHub Username:")
-    token = form.text_input("Enter GitHub Personal Access Token:", type="password", help="Help: [Create Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)")
+    sst.username = form.text_input("Enter GitHub Username:", value=sst.username)
+    sst.token = form.text_input("Enter GitHub Personal Access Token:", value=sst.token, type="password", help="Help: [Create Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)")
     show_private = form.toggle("Show Private Contributions", value=True, help="Toggle to show/hide private contributions in stats. Requires a token with 'repo' scope.")
     
     # Add warning about token permissions if showing private contributions
     if show_private:
         form.info("To view private contributions, make sure your token has the 'repo' scope enabled.", icon="ℹ️")
     
-    button_pressed = form.button("Track", type="primary")
+    if form.button("Track", type="primary"):
+        sst.button_pressed = True
 
     with st.container(border=True):
         st.page_link(
@@ -47,7 +58,7 @@ with st.sidebar:
             )
 
 
-if username and token and button_pressed:
+if sst.username and sst.token and sst.button_pressed:
     # Fetch data
     today = datetime.now().strftime("%Y-%m-%d")
     current_year = datetime.now().year
@@ -56,15 +67,15 @@ if username and token and button_pressed:
     last_dedc31st = datetime(current_year-1, 12, 31).strftime("%Y-%m-%d")
 
     year_data = fetch_data_for_duration(
-        username, 
-        token,
+        sst.username, 
+        sst.token,
         from_date= last_jan1st,
         to_date= last_dedc31st
         )
 
     current_year_data = fetch_data_for_duration(
-        username, 
-        token,
+        sst.username, 
+        sst.token,
         from_date= current_jan1st,
         to_date= today
         )
