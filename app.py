@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit import session_state as sst
 import pandas as pd
 from datetime import datetime
 from process_github_data import *
@@ -25,6 +26,14 @@ def main():
         }
     )
 
+    # Initializing session state
+    if 'username' not in sst:
+        sst.username = ''
+    if 'token' not in sst:
+        sst.token = ''
+    if 'button_pressed' not in sst:
+        sst.button_pressed = False
+
     # Title and input
     st.title("GitHub Contribution Tracker")
     with st.sidebar:
@@ -36,15 +45,16 @@ def main():
         #     - Export the data for further analysis.
         #     """)
         form = st.container(border=True)
-        username = form.text_input("Enter GitHub Username:")
-        token = form.text_input("Enter GitHub Personal Access Token:", type="password", help="Help: [Create Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)")
+        sst.username = form.text_input("Enter GitHub Username:", value=sst.username)
+        sst.token = form.text_input("Enter GitHub Personal Access Token:", value=sst.token, type="password", help="Help: [Create Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)")
         show_private = form.toggle("Show Private Contributions", value=True, help="Toggle to show/hide private contributions in stats. Requires a token with 'repo' scope.")
         
         # Add warning about token permissions if showing private contributions
         if show_private:
             form.info("To view private contributions, make sure your token has the 'repo' scope enabled.", icon="ℹ️")
         
-        button_pressed = form.button("Track", type="primary")
+        if form.button("Track", type="primary"):
+            sst.button_pressed = True
 
         with st.container(border=True):
             st.page_link(
@@ -61,11 +71,11 @@ def main():
                 )
 
     
-    if username and token and button_pressed:
+    if sst.username and sst.token and sst.button_pressed:        
         # Fetch data
-        cont_data = fetch_contribution_data(username, token)
-        user_data = fetch_user_data(username, token)
-        repo_data = fetch_repo_data(username, token)
+        cont_data = fetch_contribution_data(sst.username, sst.token)
+        user_data = fetch_user_data(sst.username, sst.token)
+        repo_data = fetch_repo_data(sst.username, sst.token)
 
         if "errors" in cont_data or "errors" in user_data or "errors" in repo_data:
             st.error("Error fetching data. Check your username/token.")
@@ -100,7 +110,7 @@ def main():
                                 <div class="user-container">
                                     <div class="user-card">
                                         <img src="{avatar_url}" alt="Avatar" class="avatar">
-                                        <div class="username">{username}</div>
+                                        <div class="username">{sst.username}</div>
                                         <div class="bio">{user_bio}</div>
                                         <div class="stats">
                                             <div class="stat">Location:<b> {location}</b></div>
@@ -215,15 +225,15 @@ def main():
                     last_dedc31st = datetime(datetime.now().year-1, 12, 31).strftime("%Y-%m-%d")
 
                     year_data = fetch_data_for_duration(
-                        username, 
-                        token,
+                        sst.username, 
+                        sst.token,
                         from_date= last_jan1st,
                         to_date= last_dedc31st
                         )
 
                     current_year_data = fetch_data_for_duration(
-                        username, 
-                        token,
+                        sst.username, 
+                        sst.token,
                         from_date= current_jan1st,
                         to_date= today
                         )
