@@ -1,21 +1,16 @@
-![image](https://github.com/user-attachments/assets/c3ed1d8b-4351-4f5c-955d-442b2f14ca54)
 
-![GitHub commit activity](https://img.shields.io/github/commit-activity/t/TheCarBun/GitHub-Stat-Checker?style=for-the-badge) 
-![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-raw/TheCarBun/GitHub-Stat-Checker?style=for-the-badge) 
-![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr-raw/TheCarBun/GitHub-Stat-Checker?style=for-the-badge) 
-![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-closed-raw/TheCarBun/GitHub-Stat-Checker?style=for-the-badge) 
-![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr-closed-raw/TheCarBun/GitHub-Stat-Checker?style=for-the-badge)
-![GitHub last commit](https://img.shields.io/github/last-commit/TheCarBun/GitHub-Stat-Checker?style=for-the-badge)
-![GitHub forks](https://img.shields.io/github/forks/TheCarBun/GitHub-Stat-Checker?style=for-the-badge)
-![GitHub Repo stars](https://img.shields.io/github/stars/TheCarBun/GitHub-Stat-Checker?style=for-the-badge)
-
-
+| Commits | Issues | Pull Requests | Forks & Stars |
+|---------|--------|---------------| ------------- |
+| ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/TheCarBun/GitHub-Stat-Checker) | ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-raw/TheCarBun/GitHub-Stat-Checker?color=green) | ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr-raw/TheCarBun/GitHub-Stat-Checker?color=green)  | ![GitHub forks](https://img.shields.io/github/forks/TheCarBun/GitHub-Stat-Checker?style=for-the-badge) |
+|![GitHub last commit](https://img.shields.io/github/last-commit/TheCarBun/GitHub-Stat-Checker) | ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-closed-raw/TheCarBun/GitHub-Stat-Checker) | ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr-closed-raw/TheCarBun/GitHub-Stat-Checker)  | ![GitHub Repo stars](https://img.shields.io/github/stars/TheCarBun/GitHub-Stat-Checker?style=for-the-badge&color=yellow) |
 
 # GitHub Stat Checker
 
 GitHub Contribution Tracker is a **Streamlit** web application that visualizes GitHub user contributions with insightful metrics, charts, and achievements. This app uses the **GitHub GraphQL API** to fetch and display data about a user's contribution history, enabling users to track and analyze their growth.
 
 **ℹ️  _Now predicts user contribution over a year using previous year's contribution data_**
+
+![image](https://github.com/user-attachments/assets/c3ed1d8b-4351-4f5c-955d-442b2f14ca54)
 
 ## Features
 <details>
