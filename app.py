@@ -6,6 +6,7 @@ from process_github_data import *
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from util import load_css
+from util import get_stars
 from fetch_github_data import *
 
 color = "#26a641"
@@ -69,6 +70,25 @@ def main():
                 icon="⚡",
                 help="ℹ️ Predict your GitHub contributions."
                 )
+        with st.container(border=True):
+            st.page_link(
+                "https://github.com/TheCarBun/GitHub-Stat-Checker",
+                label="Star the Repo",
+                icon="⭐",
+                help="⭐ Show some love by starring the repository on GitHub!",
+            )
+            st.page_link(
+                "https://ko-fi.com/thecarbun",
+                label="Buy me a coffee",
+                icon="☕",
+                help="☕ Support the developer by buying me a coffee!"
+            )
+
+            stars = get_stars()
+            if stars:
+                st.markdown(f"### ⭐ **{stars} Stars!**")
+            else:
+                st.markdown("⚠️ Could not fetch star count.")
 
     
     if sst.username and sst.token and sst.button_pressed:        
