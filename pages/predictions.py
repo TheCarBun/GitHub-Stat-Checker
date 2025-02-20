@@ -183,7 +183,7 @@ if sst.username and sst.token and sst.button_pressed:
                     value=f"{date}" if date else "Achieved",
                     delta="Achieved",
                 )
-                col.progress(100, text=f":blue[{total_contributions}/{milestone}]")
+                col.progress(100, text=f"{total_contributions}/{milestone}")
                 col.divider()
                 
 
@@ -202,7 +202,7 @@ if sst.username and sst.token and sst.button_pressed:
                 )
 
                 if progress > 0:
-                    col.progress(progress / 100, text=f":blue[{total_contributions}/{milestone}]")
+                    col.progress(progress / 100, text=f"{total_contributions}/{milestone}")
                     col.divider()
 
 
