@@ -6,7 +6,7 @@ from process_github_data import analyze_contributions
 from util import predict_days_to_milestone, get_milestone_dates, format_date_ddmmyyyy
 
 st.set_page_config(
-    page_title = "GitHub Stat Checker",
+    page_title = "GitHub Stats",
     page_icon = "./static/icon.png",
     layout = "wide",
     menu_items={
@@ -29,7 +29,7 @@ if 'button_pressed' not in sst:
     sst.button_pressed = False
 
 # Title and input
-st.title("GitHub Contribution Tracker")
+st.title("GitHub Stats")
 with st.sidebar:
     form = st.container(border=True)
     sst.username = form.text_input("Enter GitHub Username:", value=sst.username)

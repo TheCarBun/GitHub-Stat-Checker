@@ -12,7 +12,7 @@ color = "#26a641"
 
 def main():
     st.set_page_config(
-        page_title = "GitHub Stat Checker",
+        page_title = "GitHub Stats",
         page_icon = "./static/icon.png",
         layout = "wide",
         menu_items={
@@ -35,7 +35,7 @@ def main():
         sst.button_pressed = False
 
     # Title and input
-    st.title("GitHub Contribution Tracker")
+    st.title("GitHub Stats")
     with st.sidebar:
         # with st.expander("❓ How to Use This Tool"):
         #     st.write("""
