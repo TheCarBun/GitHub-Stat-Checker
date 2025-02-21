@@ -308,8 +308,6 @@ def main():
                         chart_data["Date"] = pd.to_datetime(chart_data["Date"])
                         
                         # Create year and month columns for grouping
-                        chart_data["Year"] = chart_data["Date"].dt.year
-                        chart_data["Month"] = chart_data["Date"].dt.month
                         chart_data["Sort_Key"] = chart_data["Date"].dt.strftime("%Y-%m")
                         
                         # Group and aggregate
@@ -334,8 +332,7 @@ def main():
                             height=200,
                             xaxis=dict(
                                 showgrid=True,
-                                gridcolor='rgba(128,128,128,0.2)',
-                                tickangle=45
+                                gridcolor='rgba(128,128,128,0.2)'
                             ),
                             yaxis=dict(
                                 showgrid=True,
