@@ -12,7 +12,7 @@ color = "#26a641"
 
 def main():
     st.set_page_config(
-        page_title = "GitHub Stat Checker",
+        page_title = "GitHub Stats",
         page_icon = "./static/icon.png",
         layout = "wide",
         menu_items={
@@ -35,7 +35,7 @@ def main():
         sst.button_pressed = False
 
     # Title and input
-    st.title("GitHub Contribution Tracker")
+    st.title("GitHub Stats")
     with st.sidebar:
         # with st.expander("❓ How to Use This Tool"):
         #     st.write("""
@@ -306,11 +306,45 @@ def main():
                         st.markdown("### Monthly Growth")
                         # Convert dates to datetime format
                         chart_data["Date"] = pd.to_datetime(chart_data["Date"])
-                        # Extract Year-Month and sum contributions
-                        chart_data["Year-Month"] = chart_data["Date"].dt.strftime("%Y-%m")
-                        monthly_data = chart_data.groupby("Year-Month")["Contributions"].sum().reset_index()
-
-                        st.bar_chart(monthly_data.set_index("Year-Month"), color=color, height=200)
+                        
+                        # Create year and month columns for grouping
+                        chart_data["Year"] = chart_data["Date"].dt.year
+                        chart_data["Month"] = chart_data["Date"].dt.month
+                        chart_data["Sort_Key"] = chart_data["Date"].dt.strftime("%Y-%m")
+                        
+                        # Group and aggregate
+                        monthly_data = chart_data.groupby("Sort_Key")["Contributions"].sum().reset_index()
+                        monthly_data["Display_Date"] = pd.to_datetime(monthly_data["Sort_Key"] + "-01")
+                        monthly_data = monthly_data.sort_values("Display_Date")
+                        
+                        # Create Plotly bar chart
+                        fig = go.Figure(go.Bar(
+                            x=monthly_data["Display_Date"].dt.strftime("%b %Y"),
+                            y=monthly_data["Contributions"],
+                            marker_color=color
+                        ))
+                        
+                        # Update layout for dark theme compatibility
+                        fig.update_layout(
+                            plot_bgcolor='rgba(0,0,0,0)',
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            font_color='white',
+                            showlegend=False,
+                            margin=dict(l=20, r=20, t=20, b=20),
+                            height=200,
+                            xaxis=dict(
+                                showgrid=True,
+                                gridcolor='rgba(128,128,128,0.2)',
+                                tickangle=45
+                            ),
+                            yaxis=dict(
+                                showgrid=True,
+                                gridcolor='rgba(128,128,128,0.2)'
+                            )
+                        )
+                        
+                        # Display the Plotly chart
+                        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
                     # --- Weekday vs. Weekend Contributions ---
                     col2.markdown("### Weekday vs. Weekend")
