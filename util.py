@@ -147,15 +147,3 @@ def get_milestone_dates(milestones, contributions, total_contributions, contribu
 
     return milestone_dates
 
-#Get number of stars for Github-Stat-Checker
-def get_stars():
-    """
-    Returns the number of stars for the GitHub-Stat-Checker repository.
-    """
-    url = "https://api.github.com/repos/TheCarbun/GitHub-Stat-Checker"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()["stargazers_count"]
-    else:
-        return Exception(f"Error fetching stars: {response.status_code}")
-    return 0

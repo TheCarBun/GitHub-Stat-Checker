@@ -6,7 +6,7 @@ from process_github_data import *
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from util import load_css
-from util import get_stars
+from fetch_github_data import get_stars
 from fetch_github_data import *
 
 color = "#26a641"
@@ -71,24 +71,18 @@ def main():
                 help="ℹ️ Predict your GitHub contributions."
                 )
         with st.container(border=True):
-            st.page_link(
-                "https://github.com/TheCarBun/GitHub-Stat-Checker",
-                label="Star the Repo",
-                icon="⭐",
-                help="⭐ Show some love by starring the repository on GitHub!",
-            )
-            st.page_link(
-                "https://ko-fi.com/thecarbun",
-                label="Buy me a coffee",
-                icon="☕",
-                help="☕ Support the developer by buying me a coffee!"
-            )
+            st.link_button("⭐ Star this repo", "https://github.com/TheCarBun/GitHub-Stat-Checker")
+            with st.expander("Support the Developer ☕"):
+                st.link_button("☕ Buy me a coffee", "https://ko-fi.com/thecarbun")
+                st.link_button("☕ Buy me a coffee", "https://ko-fi.com/pakagronglebel")
 
-            stars = get_stars()
-            if stars:
-                st.markdown(f"### ⭐ **{stars} Stars!**")
-            else:
-                st.markdown("⚠️ Could not fetch star count.")
+            
+        st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+        stars = get_stars()
+        if stars:
+            st.markdown(f"This repo has {stars} ☆  on GitHub")
+        else:
+            st.markdown("⚠️ Could not fetch star count.")
 
     
     if sst.username and sst.token and sst.button_pressed:        

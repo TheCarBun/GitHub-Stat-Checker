@@ -167,3 +167,18 @@ def fetch_contribution_data(username: str, token: str):
         return response.json()
     except requests.exceptions.RequestException as e:
         return {"errors": str(e)}
+
+
+#Get number of stars for Github-Stat-Checker
+@st.cache_data(ttl=600)
+def get_stars():
+    """
+    Returns the number of stars for the GitHub-Stat-Checker repository.
+    """
+    url = "https://api.github.com/repos/TheCarbun/GitHub-Stat-Checker"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()["stargazers_count"]
+    else:
+        return Exception(f"Error fetching stars: {response.status_code}")
+    return 0

@@ -4,6 +4,7 @@ from datetime import datetime
 from fetch_github_data import fetch_data_for_duration
 from process_github_data import analyze_contributions
 from util import predict_days_to_milestone, get_milestone_dates, format_date_ddmmyyyy
+from fetch_github_data import get_stars
 
 st.set_page_config(
     page_title = "GitHub Stats",
@@ -56,6 +57,19 @@ with st.sidebar:
             icon="⚡",
             help="Predict your GitHub contributions."
             )
+    with st.container(border=True):
+        st.link_button("⭐ Star this repo", "https://github.com/TheCarBun/GitHub-Stat-Checker")
+        with st.expander("Support the Developer ☕"):
+            st.link_button("☕ Buy me a coffee", "https://ko-fi.com/thecarbun")
+            st.link_button("☕ Buy me a coffee", "https://ko-fi.com/pakagronglebel")
+
+
+    st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+    stars = get_stars()
+    if stars:
+        st.markdown(f"This repo has {stars} ☆  on GitHub")
+    else:
+        st.markdown("⚠️ Could not fetch star count.")
 
 
 if sst.username and sst.token and sst.button_pressed:
