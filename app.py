@@ -307,8 +307,12 @@ def main():
                         # Convert dates to datetime format
                         chart_data["Date"] = pd.to_datetime(chart_data["Date"])
                         # Extract Year-Month and sum contributions
-                        chart_data["Year-Month"] = chart_data["Date"].dt.strftime("%Y-%m")
+                        chart_data["Year-Month"] = chart_data["Date"].dt.strftime("%b %Y")  # Changed format to show month name
                         monthly_data = chart_data.groupby("Year-Month")["Contributions"].sum().reset_index()
+                        # Sort by date to maintain chronological order
+                        monthly_data["Sort_Date"] = pd.to_datetime(monthly_data["Year-Month"], format="%b %Y")
+                        monthly_data = monthly_data.sort_values("Sort_Date")
+                        monthly_data = monthly_data.drop("Sort_Date", axis=1)
 
                         st.bar_chart(monthly_data.set_index("Year-Month"), color=color, height=200)
 
