@@ -9,6 +9,7 @@ from util import load_css
 from fetch_github_data import *
 
 color = "#26a641"
+TOKEN = st.secrets["token"]
 
 def main():
     st.set_page_config(
@@ -29,8 +30,10 @@ def main():
     # Initializing session state
     if 'username' not in sst:
         sst.username = ''
-    if 'token' not in sst:
-        sst.token = ''
+    if 'user_token' not in sst:
+        sst.user_token = ''
+    if 'token_present' not in sst:
+        sst.token_present = False
     if 'button_pressed' not in sst:
         sst.button_pressed = False
 
@@ -46,32 +49,38 @@ def main():
         #     """)
         form = st.container(border=True)
         sst.username = form.text_input("Enter GitHub Username:", value=sst.username)
-        sst.token = form.text_input("Enter GitHub Personal Access Token:", value=sst.token, type="password", help="Help: [Create Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)")
-        show_private = form.toggle("Show Private Contributions", value=True, help="Toggle to show/hide private contributions in stats. Requires a token with 'repo' scope.")
+        
+        if form.toggle("I have a GitHub Access Token", value=sst.token_present, help="Toggle if you have a token. Create [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)"):
+            sst.token_present = True
+        else:
+            sst.token_present = False
         
         # Add warning about token permissions if showing private contributions
-        if show_private:
-            form.info("To view private contributions, make sure your token has the 'repo' scope enabled.", icon="ℹ️")
+        if sst.token_present:
+            sst.user_token = form.text_input("Enter GitHub Personal Access Token:", value=sst.user_token, type="password")
+            sst.token = sst.user_token
+        else:
+            sst.token = TOKEN
         
-        if form.button("Track", type="primary"):
+        if form.button("Analyze", type="primary"):
             sst.button_pressed = True
-
-        with st.container(border=True):
-            st.page_link(
-                "app.py", 
-                label="Overview", 
-                icon="✨",
-                help="ℹ️ Check your GitHub stats and contributions."
-                )
-            st.page_link(
-                "./pages/predictions.py", 
-                label="Predictions", 
-                icon="⚡",
-                help="ℹ️ Predict your GitHub contributions."
-                )
-
+      
     
-    if sst.username and sst.token and sst.button_pressed:        
+    if sst.username and sst.token and sst.button_pressed:      
+        with st.sidebar:
+            with st.container(border=True):
+                st.page_link(
+                    "app.py", 
+                    label="Overview", 
+                    icon="✨",
+                    help="ℹ️ Check your GitHub stats and contributions."
+                    )
+                st.page_link(
+                    "./pages/predictions.py", 
+                    label="Predictions", 
+                    icon="⚡",
+                    help="ℹ️ Predict your GitHub contributions."
+                    )  
         # Fetch data
         cont_data = fetch_contribution_data(sst.username, sst.token)
         user_data = fetch_user_data(sst.username, sst.token)
@@ -141,18 +150,16 @@ def main():
                         st.warning("No contributions found. If you have private repositories, make sure your token has the 'repo' scope.")
                 
                     # Calculate contributions based on toggle
-                    display_total = public_contributions
-                    if show_private:
-                        display_total += private_contributions
-                        if private_contributions == 0:
-                            st.info("No private contributions found. If you have private repositories, verify your token permissions.")
+                    display_total = public_contributions + private_contributions
+                    if private_contributions == 0:
+                        st.info("No private contributions found. If you have private repositories, verify your token permissions.")
 
                     # Display summary metrics
                     col1, col2, col3 = st.columns(3, border=True)
                     col1.metric(
                         "Total Contributions", 
                         value= f"{display_total:,} commits",
-                        delta=f"Public: {public_contributions:,}" + (f" | Private: {private_contributions:,}" if show_private else ""),
+                        delta=f"Public: {public_contributions:,} | Private: {private_contributions:,}",
                         delta_color= "off" if display_total == 0 else "normal"
                         )
                     col2.metric(
