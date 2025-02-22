@@ -35,7 +35,13 @@ def main():
         sst.button_pressed = False
 
     # Title and input
-    st.title("GitHub Stats")
+    title_col, star_col = st.columns([9,1], vertical_alignment="bottom")
+    title_col.title("GitHub Stats")
+    stars = fetch_star_count()
+    star_col.link_button(f"⭐ Star :orange[(**{stars}**)]", 
+                         "https://github.com/TheCarBun/GitHub-Stat-Checker", 
+                         help=f"Give a star to this repository on GitHub. Current stars: {stars}",
+                         use_container_width=True)
     with st.sidebar:
         # with st.expander("❓ How to Use This Tool"):
         #     st.write("""
