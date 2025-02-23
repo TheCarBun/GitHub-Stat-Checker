@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit import session_state as sst
 from datetime import datetime
-from fetch_github_data import fetch_data_for_duration, fetch_star_count
+from fetch_github_data import fetch_data_for_duration
 from process_github_data import analyze_contributions
 from util import predict_days_to_milestone, get_milestone_dates, format_date_ddmmyyyy
 
@@ -161,62 +161,65 @@ def main():
         milestones = [100, 500, 1000, 2000, 5000, 10000]
         with st.container():
             st.markdown("#### :material/done_all: Milestones Estimations")
+            if sst.user_token:
             
-            # User's current contributions
-            current_contributions = current_year_stats.get("total_contributions", 0)
-            if current_contributions == 0:
-                st.error("No contributions found for the current year.")
-                st.stop()
-            # Calculate days required for each milestone
-            milestone_predictions = {
-                milestone: predict_days_to_milestone(current_contributions, milestone, contribution_rate)
-                for milestone in milestones
-            }
+                # User's current contributions
+                current_contributions = current_year_stats.get("total_contributions", 0)
+                if current_contributions == 0:
+                    st.error("No contributions found for the current year.")
+                    st.stop()
+                # Calculate days required for each milestone
+                milestone_predictions = {
+                    milestone: predict_days_to_milestone(current_contributions, milestone, contribution_rate)
+                    for milestone in milestones
+                }
 
-            contributions = current_year_data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]
+                contributions = current_year_data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]
 
-            milestone_dates = get_milestone_dates(milestones, contributions, total_contributions, contribution_rate)
+                milestone_dates = get_milestone_dates(milestones, contributions, total_contributions, contribution_rate)
 
 
-            # Display Milestones
-        
+                # Display Milestones
+            
 
-            col1, col2 = st.columns(2, border=True)
+                col1, col2 = st.columns(2, border=True)
 
-            for i, (milestone, days) in enumerate(milestone_predictions.items()):
-                col = col1 if i % 2 == 0 else col2  # Alternate between columns
-                if total_contributions >= milestone:
-                    # Unlocked Milestone
-                    status = milestone_dates.get(milestone, 'Not Achieveable')
-                    date = ''
-                    if status != 'Not Achieveable':
-                        date = format_date_ddmmyyyy(status)
-                    col.metric(
-                        label=f"✅ Achieved Milestone: {milestone} commits",
-                        value=f"{date}" if date else "Achieved",
-                        delta="Achieved",
-                    )
-                    col.progress(100, text=f"{total_contributions}/{milestone}")
-                    col.divider()
-                    
-
-                
-                else:
-                    progress = min(100, (total_contributions / milestone) * 100)
-                    # Locked Milestone with Progress Bar
-                    status = milestone_dates.get(milestone, 'Not Achieveable')
-                    date = ''
-                    if status != 'Not Achieveable':
-                        date = format_date_ddmmyyyy(status)
-                    col.metric(
-                        label=f"Estimated days to {milestone} commits",
-                        value=f"{date}" if date else "Not achievable",
-                        delta=f"{days:.0f} days" if days != float('inf') else "Not achievable"
-                    )
-
-                    if progress > 0:
-                        col.progress(progress / 100, text=f"{total_contributions}/{milestone}")
+                for i, (milestone, days) in enumerate(milestone_predictions.items()):
+                    col = col1 if i % 2 == 0 else col2  # Alternate between columns
+                    if total_contributions >= milestone:
+                        # Unlocked Milestone
+                        status = milestone_dates.get(milestone, 'Not Achieveable')
+                        date = ''
+                        if status != 'Not Achieveable':
+                            date = format_date_ddmmyyyy(status)
+                        col.metric(
+                            label=f"✅ Achieved Milestone: {milestone} commits",
+                            value=f"{date}" if date else "Achieved",
+                            delta="Achieved",
+                        )
+                        col.progress(100, text=f"{total_contributions}/{milestone}")
                         col.divider()
+                        
+
+                    
+                    else:
+                        progress = min(100, (total_contributions / milestone) * 100)
+                        # Locked Milestone with Progress Bar
+                        status = milestone_dates.get(milestone, 'Not Achieveable')
+                        date = ''
+                        if status != 'Not Achieveable':
+                            date = format_date_ddmmyyyy(status)
+                        col.metric(
+                            label=f"Estimated days to {milestone} commits",
+                            value=f"{date}" if date else "Not achievable",
+                            delta=f"{days:.0f} days" if days != float('inf') else "Not achievable"
+                        )
+
+                        if progress > 0:
+                            col.progress(progress / 100, text=f"{total_contributions}/{milestone}")
+                            col.divider()
+            else:
+                st.info("Create GitHub Access Token to view these stats")
 
 
 
