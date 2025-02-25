@@ -554,7 +554,7 @@ def main():
                     else:
                         st.info("Create GitHub Access Token to view these stats")
     else:
-        st.info("ℹ️ ***Enter your GitHub username and token in the sidebar to get started.***")
+        st.info("ℹ️ ***Enter your GitHub username in the sidebar to see your stats.***")
 
 
 if __name__ == "__main__":
