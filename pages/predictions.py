@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit import session_state as sst
 from datetime import datetime
-from fetch_github_data import fetch_data_for_duration
+from fetch_github_data import fetch_data_for_duration, fetch_star_count
 from process_github_data import analyze_contributions
 from util import predict_days_to_milestone, get_milestone_dates, format_date_ddmmyyyy
 
@@ -34,8 +34,13 @@ def main():
         sst.button_pressed = False
 
     # Title and input
-    st.title("GitHub Stats")
-    
+    title_col, star_col = st.columns([9,1], vertical_alignment="bottom")
+    title_col.title("GitHub Stats")
+    stars = fetch_star_count()
+    star_col.link_button(f"⭐ Star :orange[(**{stars}**)]", 
+                         "https://github.com/TheCarBun/GitHub-Stat-Checker", 
+                         help=f"Give a star to this repository on GitHub. Current stars: {stars}",
+                         use_container_width=True)
     with st.sidebar:            
         form = st.container(border=True)
         sst.username = form.text_input("Enter GitHub Username:", value=sst.username)
