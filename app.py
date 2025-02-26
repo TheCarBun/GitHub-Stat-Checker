@@ -176,7 +176,7 @@ def main():
                     col3.metric(
                         "Most Productive Day",
                         value= f"{highest_contribution} commits",
-                        delta=f"{highest_contribution_date}",
+                        delta=f"{highest_contribution_date if highest_contribution>0 else 'No activity found'}",
                         delta_color="normal"
                         )
                     
