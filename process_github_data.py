@@ -55,6 +55,17 @@ def process_contribution_data(data: dict):
         weeks = calendar.get("weeks", [])
         contribution_days = [day["date"] for week in weeks for day in week["contributionDays"] if day["contributionCount"] > 0]
         active_days = len(set(contribution_days))  # Unique active contribution days
+        
+        # Today's Date in format of how it's fetched from GraohQL
+        today = datetime.now().strftime("%Y-%m-%d") 
+
+        # Find today's contributions
+        today_commits = sum(
+            day["contributionCount"]
+            for week in weeks
+            for day in week["contributionDays"]
+            if day["date"] == today
+        )
 
         return {
             "total_contributions": total_contributions,
@@ -62,6 +73,7 @@ def process_contribution_data(data: dict):
             "private_contributions": private_contributions,
             "highest_contribution": highest_contribution,
             "highest_contribution_date": highest_contribution_date,
+            "today_commits": today_commits,
             "current_streak": current_streak,
             "longest_streak": longest_streak,
             "active_days": active_days,

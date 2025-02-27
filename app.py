@@ -145,6 +145,7 @@ def main():
                     private_contributions = cont_stats.get("private_contributions", 0)
                     highest_contribution = cont_stats.get("highest_contribution", 0)
                     highest_contribution_date = cont_stats.get("highest_contribution_date", None)
+                    today_commits = cont_stats.get("today_commits", 0)
                     current_streak = cont_stats.get("current_streak", 0)
                     longest_streak = cont_stats.get("longest_streak", 0)
                     days = cont_stats.get("days", [])
@@ -160,6 +161,8 @@ def main():
                         st.info("No private contributions found. If you have private repositories, verify your token permissions.")
 
                     # Display summary metrics
+                    if today_commits > 0:
+                        st.markdown(f"#### 🔥 Today: {today_commits} commits")
                     col1, col2, col3 = st.columns(3, border=True)
                     col1.metric(
                         "Total Contributions", 
