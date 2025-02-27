@@ -34,7 +34,7 @@ def main():
         sst.button_pressed = False
 
     # Title and input
-    title_col, star_col = st.columns([9,1], vertical_alignment="bottom")
+    title_col, star_col = st.columns([8.5,1.5], vertical_alignment="bottom")
     title_col.title("GitHub Stats")
     stars = fetch_star_count()
     star_col.link_button(f"⭐ Star :orange[(**{stars}**)]", 
