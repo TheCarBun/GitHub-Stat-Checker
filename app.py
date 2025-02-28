@@ -5,7 +5,7 @@ from datetime import datetime
 from process_github_data import *
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
-from util import load_css
+from util import load_css, format_date_ddmmyyyy
 from fetch_github_data import *
 
 color = "#26a641"
@@ -112,6 +112,8 @@ def main():
                     repositories = user_stats.get("repositories")
                     total_prs = user_stats.get("total_pullrequests")
                     total_issues = user_stats.get("total_issues")
+                    created_at = datetime.strptime(user_stats.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
+                    created_at = created_at.strftime("%Y-%m-%d")
 
                     custom_css = load_css()
                     st.markdown(f"""
@@ -235,62 +237,82 @@ def main():
                         # Fetch data
                         chart_data['Year'] = chart_data['Date'].dt.year
                         yearly_contributions = chart_data.groupby('Year')['Contributions'].sum().round(1)  # Round to 1 decimal
-
-                        today = datetime.now().strftime("%Y-%m-%d")
-                        current_jan1st = datetime(datetime.now().year, 1, 1).strftime("%Y-%m-%d")
-                        last_jan1st = datetime(datetime.now().year-1, 1, 1).strftime("%Y-%m-%d")
-                        last_dedc31st = datetime(datetime.now().year-1, 12, 31).strftime("%Y-%m-%d")
-
-                        year_data = fetch_data_for_duration(
-                            sst.username, 
-                            sst.token,
-                            from_date= last_jan1st,
-                            to_date= last_dedc31st
-                            )
-
-                        current_year_data = fetch_data_for_duration(
-                            sst.username, 
-                            sst.token,
-                            from_date= current_jan1st,
-                            to_date= today
-                            )
-                        
-                        # Process data
-                        whole_year_stats = analyze_contributions(year_data)
-                        current_year_stats = analyze_contributions(current_year_data)
-                                        
+                    
+                    # ------------- Last Year Contributions
                     with st.container(border=True):
                         st.markdown(f"#### :material/calendar_month: **Last year contributions({datetime.now().year-1}):**")
                         if sst.user_token:
                             # --- 365 days stats ---
-                            total_contributions_ly = whole_year_stats.get('total_contributions')
-                            total_days_ly = whole_year_stats.get('total_days')
-                            contribution_rate_ly = whole_year_stats.get('contribution_rate')
-                            active_days_ly = whole_year_stats.get('active_days')
-                            percent_active_days_ly = (whole_year_stats.get('active_days')/total_days_ly)*100
+                            last_jan1st = datetime(datetime.now().year-1, 1, 1).strftime("%Y-%m-%d")
+                            last_dec31st = datetime(datetime.now().year-1, 12, 31).strftime("%Y-%m-%d")
+                            from_date= last_jan1st
+                            # Date comes between Jan 1st and Dec 31st. We use join date as start date
+                            if last_jan1st < created_at < last_dec31st: 
+                                year_data = fetch_data_for_duration(
+                                    sst.username, 
+                                    sst.token,
+                                    from_date= created_at,
+                                    to_date= last_dec31st
+                                )
+                                from_date = created_at
+                            # Date comes after Dec 31st. Unable to calculate rate for last year
+                            elif created_at >= last_dec31st:
+                                year_data = None
+                            # Date comes before Jan 1st. We use Jan 1st as starting date
+                            else:
+                                year_data = fetch_data_for_duration(
+                                    sst.username, 
+                                    sst.token,
+                                    from_date= last_jan1st,
+                                    to_date= last_dec31st
+                                )
+                            if year_data:
+                                # Process data
+                                whole_year_stats = analyze_contributions(year_data)
 
-                            col1, col2 = st.columns(2)
-                            col1.metric(
-                                label="Total Contributions", 
-                                value=f"{total_contributions_ly} commits",
-                                delta=f"{contribution_rate_ly:.2f} contributions/day",
-                                delta_color="inverse" if contribution_rate_ly < 1 else "normal",
-                                border=True
-                                )
-                            
-                            col2.metric(
-                                label="Active Days", 
-                                value=f"{active_days_ly} days",
-                                delta=f"{percent_active_days_ly:.1f}% days active",
-                                delta_color="inverse" if percent_active_days_ly < 8 else "normal",
-                                border=True
-                                )
+                                total_contributions_ly = whole_year_stats.get('total_contributions')
+                                total_days_ly = whole_year_stats.get('total_days')
+                                contribution_rate_ly = whole_year_stats.get('contribution_rate')
+                                active_days_ly = whole_year_stats.get('active_days')
+                                percent_active_days_ly = (whole_year_stats.get('active_days')/total_days_ly)*100
+
+                                col1, col2 = st.columns(2)
+                                col1.metric(
+                                    label=f"Total Contributions {f'`(from:{format_date_ddmmyyyy(from_date)})`' if from_date != last_jan1st else ''}", 
+                                    value=f"{total_contributions_ly} commits",
+                                    delta=f"{contribution_rate_ly:.2f} contributions/day",
+                                    delta_color="inverse" if contribution_rate_ly < 1 else "normal",
+                                    border=True
+                                    )
+                                
+                                col2.metric(
+                                    label="Active Days", 
+                                    value=f"{active_days_ly} days",
+                                    delta=f"{percent_active_days_ly:.1f}% days active",
+                                    delta_color="inverse" if percent_active_days_ly < 8 else "normal",
+                                    border=True
+                                    )
+                            else:
+                                st.info(f"No Data for year {datetime.now().year-1}")
                         else:
                             st.info("Create GitHub Access Token to view these stats")
                         
                         # --- Current year stats ---
                         st.markdown(f"#### :material/calendar_today: **Contributions in current year({datetime.now().year}):**")
                         if sst.user_token:
+                            today = datetime.now().strftime("%Y-%m-%d")
+                            current_jan1st = datetime(datetime.now().year, 1, 1).strftime("%Y-%m-%d")
+                            
+                            # Fetching current year data
+                            current_year_data = fetch_data_for_duration(
+                                sst.username, 
+                                sst.token,
+                                from_date= current_jan1st,
+                                to_date= today
+                                )
+                            # Process data
+                            current_year_stats = analyze_contributions(current_year_data)
+
                             total_contributions = current_year_stats.get('total_contributions')
                             total_days = current_year_stats.get('total_days')
                             contribution_rate = current_year_stats.get('contribution_rate')
