@@ -1,8 +1,8 @@
 import streamlit as st
 from streamlit import session_state as sst
 from datetime import datetime
-from fetch_github_data import fetch_data_for_duration, fetch_star_count
-from process_github_data import analyze_contributions
+from fetch_github_data import fetch_data_for_duration, fetch_star_count, fetch_user_data
+from process_github_data import analyze_contributions, process_user_data
 from util import predict_days_to_milestone, get_milestone_dates, format_date_ddmmyyyy
 
 TOKEN = st.secrets["token"]
@@ -78,42 +78,68 @@ def main():
                     )  
                 
         # Fetch data
+        user_data = fetch_user_data(sst.username, sst.token)
+        user_stats = process_user_data(user_data)
+        created_at = datetime.strptime(user_stats.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
+        created_at = created_at.strftime("%Y-%m-%d")
+
         today = datetime.now().strftime("%Y-%m-%d")
         current_year = datetime.now().year
         current_jan1st = datetime(current_year, 1, 1).strftime("%Y-%m-%d")
         last_jan1st = datetime(current_year-1, 1, 1).strftime("%Y-%m-%d")
-        last_dedc31st = datetime(current_year-1, 12, 31).strftime("%Y-%m-%d")
+        last_dec31st = datetime(current_year-1, 12, 31).strftime("%Y-%m-%d")
 
-        year_data = fetch_data_for_duration(
-            sst.username, 
-            sst.token,
-            from_date= last_jan1st,
-            to_date= last_dedc31st
+        # ------------- Last Year Contributions
+        last_year_data_present = True
+        from_date= last_jan1st# Date comes before Jan 1st. We use Jan 1st as starting date
+        to_date= last_dec31st
+
+        # Date comes between Jan 1st and Dec 31st. We use join date as start date
+        if last_jan1st < created_at < last_dec31st: 
+            from_date= created_at
+        # Date comes after Dec 31st. Unable to calculate rate for last year
+        elif created_at >= last_dec31st:
+            last_year_data_present = False
+        
+            
+        # If last year data is present
+        if last_year_data_present:
+            year_data = fetch_data_for_duration(
+                sst.username, 
+                sst.token,
+                from_date= from_date,
+                to_date= to_date
             )
+            # Analyze only when data present
+            whole_year_stats = analyze_contributions(year_data)
 
+            # --- Get required stats ---
+            contribution_rate_ly = whole_year_stats.get('contribution_rate', 0)
+            # active_days_ly = whole_year_stats.get('active_days', 0)
+        else:
+            contribution_rate_ly = 0
+
+
+        # -------------- Current Year Data
+        from_date= created_at
+        # Fetching current year data
+        if current_jan1st >= created_at: # If joined before Jan 1st
+            from_date= current_jan1st
         current_year_data = fetch_data_for_duration(
             sst.username, 
             sst.token,
-            from_date= current_jan1st,
+            from_date= from_date,
             to_date= today
             )
         
-        # Process data
-        whole_year_stats = analyze_contributions(year_data)
+        # Process current year data
         current_year_stats = analyze_contributions(current_year_data)
-
         
-        
-        with st.container(border=True):
-            # --- 365 days stats ---
-            contribution_rate_ly = whole_year_stats.get('contribution_rate', 0)
-            active_days_ly = whole_year_stats.get('active_days', 0)
-            
-            # --- Current year stats ---
-            total_contributions = current_year_stats.get('total_contributions', 0)
-            total_days = current_year_stats.get('total_days', 0)
-            contribution_rate = current_year_stats.get('contribution_rate', 0)
-            active_days = current_year_stats.get('active_days', 0)
+        # --- Current year stats ---
+        total_contributions = current_year_stats.get('total_contributions', 0)
+        total_days = current_year_stats.get('total_days', 0)
+        contribution_rate = current_year_stats.get('contribution_rate', 0)
+        active_days = current_year_stats.get('active_days', 0)
 
         # --- Future Predictions ---
         if contribution_rate_ly == 0:
