@@ -245,28 +245,26 @@ def main():
                             # --- 365 days stats ---
                             last_jan1st = datetime(datetime.now().year-1, 1, 1).strftime("%Y-%m-%d")
                             last_dec31st = datetime(datetime.now().year-1, 12, 31).strftime("%Y-%m-%d")
-                            from_date= last_jan1st
+                            
+                            last_year_data_present = True
+                            from_date= last_jan1st# Date comes before Jan 1st. We use Jan 1st as starting date
+                            to_date= last_dec31st
+
                             # Date comes between Jan 1st and Dec 31st. We use join date as start date
                             if last_jan1st < created_at < last_dec31st: 
-                                year_data = fetch_data_for_duration(
-                                    sst.username, 
-                                    sst.token,
-                                    from_date= created_at,
-                                    to_date= last_dec31st
-                                )
-                                from_date = created_at
+                                from_date= created_at
                             # Date comes after Dec 31st. Unable to calculate rate for last year
                             elif created_at >= last_dec31st:
-                                year_data = None
-                            # Date comes before Jan 1st. We use Jan 1st as starting date
-                            else:
+                                last_year_data_present = False
+
+                            # If last year data is present    
+                            if last_year_data_present:
                                 year_data = fetch_data_for_duration(
                                     sst.username, 
                                     sst.token,
-                                    from_date= last_jan1st,
-                                    to_date= last_dec31st
+                                    from_date= from_date,
+                                    to_date= to_date
                                 )
-                            if year_data:
                                 # Process data
                                 whole_year_stats = analyze_contributions(year_data)
 
