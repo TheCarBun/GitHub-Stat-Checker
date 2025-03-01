@@ -240,7 +240,7 @@ def main():
                     
                     # ------------- Last Year Contributions
                     with st.container(border=True):
-                        st.markdown(f"#### :material/calendar_month: **Last year contributions({datetime.now().year-1}):**")
+                        st.markdown(f"#### :material/calendar_month: **Contributions in {datetime.now().year-1}:**")
                         if sst.user_token:
                             # --- 365 days stats ---
                             last_jan1st = datetime(datetime.now().year-1, 1, 1).strftime("%Y-%m-%d")
@@ -278,7 +278,7 @@ def main():
 
                                 col1, col2 = st.columns(2)
                                 col1.metric(
-                                    label=f"Total Contributions {f'`(from:{format_date_ddmmyyyy(from_date)})`' if from_date != last_jan1st else ''}", 
+                                    label=f"Total Contributions {f'`since {format_date_ddmmyyyy(from_date)}`' if from_date != last_jan1st else ''}", 
                                     value=f"{total_contributions_ly} commits",
                                     delta=f"{contribution_rate_ly:.2f} contributions/day",
                                     delta_color="inverse" if contribution_rate_ly < 1 else "normal",
@@ -287,7 +287,7 @@ def main():
                                 
                                 col2.metric(
                                     label="Active Days", 
-                                    value=f"{active_days_ly} days",
+                                    value=f"{active_days_ly}/{total_days_ly} days",
                                     delta=f"{percent_active_days_ly:.1f}% days active",
                                     delta_color="inverse" if percent_active_days_ly < 8 else "normal",
                                     border=True
@@ -298,18 +298,21 @@ def main():
                             st.info("Create GitHub Access Token to view these stats")
                         
                         # --- Current year stats ---
-                        st.markdown(f"#### :material/calendar_today: **Contributions in current year({datetime.now().year}):**")
+                        st.markdown(f"#### :material/calendar_today: **Contributions in {datetime.now().year}:**")
                         if sst.user_token:
                             today = datetime.now().strftime("%Y-%m-%d")
                             current_jan1st = datetime(datetime.now().year, 1, 1).strftime("%Y-%m-%d")
-                            
+                            from_date= created_at
                             # Fetching current year data
+                            if current_jan1st >= created_at: # If joined before Jan 1st
+                                from_date= current_jan1st
                             current_year_data = fetch_data_for_duration(
                                 sst.username, 
                                 sst.token,
-                                from_date= current_jan1st,
+                                from_date= from_date,
                                 to_date= today
                                 )
+
                             # Process data
                             current_year_stats = analyze_contributions(current_year_data)
 
@@ -321,7 +324,7 @@ def main():
 
                             col1, col2 = st.columns(2)
                             col1.metric(
-                                label="Total Contributions", 
+                                label=f"Total Contributions{f'`since {format_date_ddmmyyyy(from_date)}`' if from_date != current_jan1st else ''}", 
                                 value=f"{total_contributions} commits",
                                 delta=f"{contribution_rate:.2f} contributions/day",
                                 delta_color="inverse" if contribution_rate < 1 else "normal",
