@@ -16,7 +16,7 @@ def get_streaks(days:list):
         longest_streak = 0
     return current_streak, longest_streak
 
-def get_highest_contribution(days):
+def get_highest_contribution(days:list):
     
     try:
         highest_day = max(days, key=lambda day: day['contributionCount'])
@@ -29,7 +29,7 @@ def get_highest_contribution(days):
     
     return highest_contribution, highest_contribution_date
 
-def get_active_days(weeks):
+def get_active_days(weeks:list):
     # Extract contribution days
     try:
         contribution_days = [day["date"] for week in weeks for day in week["contributionDays"] if day["contributionCount"] > 0]
@@ -40,7 +40,7 @@ def get_active_days(weeks):
 
     return active_days
 
-def get_todays_commits(weeks):
+def get_todays_commits(weeks:list):
     try:
         # Today's Date in format of how it's fetched from GraohQL
         today = datetime.now().strftime("%Y-%m-%d") 

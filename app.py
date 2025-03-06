@@ -2,12 +2,12 @@ import streamlit as st
 from streamlit import session_state as sst
 import pandas as pd
 from datetime import datetime
-from process_github_data import *
+from utils.process_github_data import *
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
-from util import load_css, format_date_ddmmyyyy
-from fetch_github_data import *
-from streamlit_ui import base_ui, nav_ui, growth_stats
+from utils.util import load_css, format_date_ddmmyyyy
+from utils.fetch_github_data import *
+from utils.streamlit_ui import base_ui, growth_stats
 
 color = "#26a641"
 

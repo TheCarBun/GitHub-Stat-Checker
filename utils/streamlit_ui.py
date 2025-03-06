@@ -1,6 +1,6 @@
 import streamlit as st
 from streamlit import session_state as sst
-from fetch_github_data import fetch_star_count
+from utils.fetch_github_data import fetch_star_count
 
 TOKEN = st.secrets["token"]
 

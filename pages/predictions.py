@@ -1,10 +1,10 @@
 import streamlit as st
 from streamlit import session_state as sst
 from datetime import datetime
-from fetch_github_data import fetch_data_for_duration, fetch_star_count, fetch_user_data
-from process_github_data import analyze_contributions, process_user_data
-from util import predict_days_to_milestone, get_milestone_dates, format_date_ddmmyyyy
-from streamlit_ui import base_ui, nav_ui
+from utils.fetch_github_data import fetch_data_for_duration, fetch_user_data
+from utils.process_github_data import analyze_contributions, process_user_data
+from utils.util import predict_days_to_milestone, get_milestone_dates, format_date_ddmmyyyy
+from utils.streamlit_ui import base_ui
 
 def main():
     base_ui()

@@ -1,5 +1,5 @@
 from datetime import datetime
-from util import get_streaks, get_highest_contribution, get_active_days, get_todays_commits, format_duration, is_less_than_2_months_old, format_iso_date, format_date_ddmmyyyy
+from utils.util import get_streaks, get_highest_contribution, get_active_days, get_todays_commits, format_duration, is_less_than_2_months_old, format_iso_date, format_date_ddmmyyyy
 
 def process_contribution_data(data: dict):
     """
