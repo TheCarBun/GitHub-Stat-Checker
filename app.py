@@ -15,8 +15,6 @@ def main():
     base_ui() # Base UI containing title, star button and sidebar form
     
     if sst.username and sst.token and sst.button_pressed:
-        nav_ui() # Sidebar navigation menu
-        
         # Fetch data
         cont_data = fetch_contribution_data(sst.username, sst.token)
         user_data = fetch_user_data(sst.username, sst.token)

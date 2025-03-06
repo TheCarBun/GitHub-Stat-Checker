@@ -26,7 +26,12 @@ def base_ui():
 
     with st.sidebar:
         form() # Streamlit Form
+
+        if sst.username and sst.token and sst.button_pressed:
+            nav_ui() # Sidebar navigation menu
+
         # how_to_use()
+        promo()
 
 
 def page_config():
@@ -171,6 +176,11 @@ def nav_ui():
             icon="⚡",
             help="ℹ️ Predict your GitHub contributions."
             )
+
+def promo():
+    with open("static/sidebar.html", "r", encoding="UTF-8") as sidebar_file:
+        sidebar_html = sidebar_file.read()
+    st.html(sidebar_html)
 
 def growth_stats(total_contributions:int, contribution_rate:int, active_days:int, total_days:int, percent_active_days:float, since:str):
     col1, col2 = st.columns(2)

@@ -9,9 +9,7 @@ from streamlit_ui import base_ui, nav_ui
 def main():
     base_ui()
 
-    if sst.username and sst.token and sst.button_pressed:
-        nav_ui()
-                
+    if sst.username and sst.token and sst.button_pressed:                
         # Fetch data
         user_data = fetch_user_data(sst.username, sst.token)
         user_stats = process_user_data(user_data)
