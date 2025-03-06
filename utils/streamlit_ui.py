@@ -164,17 +164,20 @@ def nav_ui():
     """
 
     with st.sidebar.container(border=True):
-        st.page_link(
+        col1, col2 = st.columns(2)
+        col1.page_link(
             "app.py", 
             label="Overview", 
             icon="✨",
-            help="ℹ️ Check your GitHub stats and contributions."
+            help="ℹ️ Check your GitHub stats and contributions.",
+            use_container_width=True
             )
-        st.page_link(
+        col2.page_link(
             "./pages/predictions.py", 
             label="Predictions", 
             icon="⚡",
-            help="ℹ️ Predict your GitHub contributions."
+            help="ℹ️ Predict your GitHub contributions.",
+            use_container_width=True
             )
 
 def promo():
