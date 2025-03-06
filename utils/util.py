@@ -4,14 +4,24 @@ from dateutil.relativedelta import relativedelta
 def get_streaks(days:list):
     current_streak = 0
     longest_streak = 0
+    last_contribution_date = None
     try:
         for day in days:
-            if day.get('contributionCount', 0) > 0:
+            date = datetime.strptime(day["date"], "%Y-%m-%d")
+            count = day.get('contributionCount', 0)
+            if count > 0:
+                if last_contribution_date and (date - last_contribution_date).days > 1:
+                    current_streak =0
                 current_streak += 1
                 longest_streak = max(longest_streak, current_streak)
-            else:
-                current_streak = 0
-    except (TypeError, KeyError):
+                last_contribution_date = date
+        
+        today = datetime.today().date()
+        if last_contribution_date and (today - last_contribution_date.date()).days > 1:
+            current_streak = 0
+
+    except Exception as e:
+        print(e)
         current_streak = 0
         longest_streak = 0
     return current_streak, longest_streak
