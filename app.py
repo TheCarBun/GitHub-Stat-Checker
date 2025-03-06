@@ -7,86 +7,16 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from util import load_css, format_date_ddmmyyyy
 from fetch_github_data import *
+from streamlit_ui import base_ui, nav_ui, growth_stats
 
 color = "#26a641"
-TOKEN = st.secrets["token"]
 
 def main():
-    st.set_page_config(
-        page_title = "GitHub Stats",
-        page_icon = "./static/icon.png",
-        layout = "wide",
-        menu_items={
-            "About": """
-            This is a Streamlit app that tracks your GitHub contributions and provides insights into your activity.  
-            Built by [:red[TheCarBun]](https://github.com/TheCarBun/) & [:red[Pakagronglb]](https://github.com/pakagronglb)  
-            GitHub: [:green[GitHub-Stats]](https://github.com/TheCarBun/GitHub-Stat-Checker)
-            """,
-            
-            "Report a bug": "https://github.com/TheCarBun/GitHub-Stat-Checker/issues",
-        }
-    )
-
-    # Initializing session state
-    if 'username' not in sst:
-        sst.username = ''
-    if 'user_token' not in sst:
-        sst.user_token = ''
-    if 'token_present' not in sst:
-        sst.token_present = False
-    if 'button_pressed' not in sst:
-        sst.button_pressed = False
-
-    # Title and input
-    title_col, star_col = st.columns([8.5,1.5], vertical_alignment="bottom")
-    title_col.title("GitHub Stats")
-    stars = fetch_star_count()
-    star_col.link_button(f"⭐ Star :orange[(**{stars}**)]", 
-                         "https://github.com/TheCarBun/GitHub-Stat-Checker", 
-                         help=f"Give a star to this repository on GitHub. Current stars: {stars}",
-                         use_container_width=True)
-    with st.sidebar:
-        # with st.expander("❓ How to Use This Tool"):
-        #     st.write("""
-        #     This tool analyzes your GitHub activity and predicts future contributions.
-        #     - Enter your GitHub username.
-        #     - View your stats and predictions.
-        #     - Export the data for further analysis.
-        #     """)
-        form = st.container(border=True)
-        sst.username = form.text_input("Enter GitHub Username:", value=sst.username)
-        
-        if form.toggle("I have a GitHub Access Token", value=sst.token_present, help="Toggle if you have a token. Create [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)"):
-            sst.token_present = True
-        else:
-            sst.token_present = False
-        
-        # Add warning about token permissions if showing private contributions
-        if sst.token_present:
-            sst.user_token = form.text_input("Enter GitHub Personal Access Token:", value=sst.user_token, type="password")
-            sst.token = sst.user_token
-        else:
-            sst.token = TOKEN
-        
-        if form.button("Analyze", type="primary"):
-            sst.button_pressed = True
-      
+    base_ui() # Base UI containing title, star button and sidebar form
     
-    if sst.username and sst.token and sst.button_pressed:      
-        with st.sidebar:
-            with st.container(border=True):
-                st.page_link(
-                    "app.py", 
-                    label="Overview", 
-                    icon="✨",
-                    help="ℹ️ Check your GitHub stats and contributions."
-                    )
-                st.page_link(
-                    "./pages/predictions.py", 
-                    label="Predictions", 
-                    icon="⚡",
-                    help="ℹ️ Predict your GitHub contributions."
-                    )  
+    if sst.username and sst.token and sst.button_pressed:
+        nav_ui() # Sidebar navigation menu
+        
         # Fetch data
         cont_data = fetch_contribution_data(sst.username, sst.token)
         user_data = fetch_user_data(sst.username, sst.token)
@@ -273,23 +203,14 @@ def main():
                                 contribution_rate_ly = whole_year_stats.get('contribution_rate')
                                 active_days_ly = whole_year_stats.get('active_days')
                                 percent_active_days_ly = (whole_year_stats.get('active_days')/total_days_ly)*100
-
-                                col1, col2 = st.columns(2)
-                                col1.metric(
-                                    label=f"Total Contributions {f'`since {format_date_ddmmyyyy(from_date)}`' if from_date != last_jan1st else ''}", 
-                                    value=f"{total_contributions_ly} commits",
-                                    delta=f"{contribution_rate_ly:.2f} contributions/day",
-                                    delta_color="inverse" if contribution_rate_ly < 1 else "normal",
-                                    border=True
-                                    )
-                                
-                                col2.metric(
-                                    label="Active Days", 
-                                    value=f"{active_days_ly}/{total_days_ly} days",
-                                    delta=f"{percent_active_days_ly:.1f}% days active",
-                                    delta_color="inverse" if percent_active_days_ly < 8 else "normal",
-                                    border=True
-                                    )
+                                since = f'`since {format_date_ddmmyyyy(from_date)}`' if from_date != last_jan1st else ''
+                                growth_stats(
+                                    total_contributions=total_contributions_ly, 
+                                    contribution_rate=contribution_rate_ly, 
+                                    active_days=active_days_ly, 
+                                    total_days= total_days_ly,
+                                    percent_active_days=percent_active_days_ly, 
+                                    since=since)
                             else:
                                 st.info(f"No Data for year {datetime.now().year-1}")
                         else:
@@ -319,23 +240,16 @@ def main():
                             contribution_rate = current_year_stats.get('contribution_rate')
                             active_days = current_year_stats.get('active_days')
                             percent_active_days = (current_year_stats.get('active_days')/total_days)*100
+                            since = f'`since {format_date_ddmmyyyy(from_date)}`' if from_date != current_jan1st else ''
 
-                            col1, col2 = st.columns(2)
-                            col1.metric(
-                                label=f"Total Contributions{f'`since {format_date_ddmmyyyy(from_date)}`' if from_date != current_jan1st else ''}", 
-                                value=f"{total_contributions} commits",
-                                delta=f"{contribution_rate:.2f} contributions/day",
-                                delta_color="inverse" if contribution_rate < 1 else "normal",
-                                border=True
-                                )
-                            
-                            col2.metric(
-                                label="Active Days", 
-                                value=f"{active_days}/{total_days} days",
-                                delta=f"{percent_active_days:.1f}% days active",
-                                delta_color="inverse" if percent_active_days < 8 else "normal",
-                                border=True
-                                )
+                            growth_stats(
+                                total_contributions=total_contributions,
+                                contribution_rate=contribution_rate,
+                                active_days=active_days,
+                                total_days=total_days,
+                                percent_active_days=percent_active_days,
+                                since=since
+                            )
                         else:
                             st.info("Create GitHub Access Token to view these stats")
 

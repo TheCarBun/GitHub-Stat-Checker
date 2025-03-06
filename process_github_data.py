@@ -1,5 +1,5 @@
 from datetime import datetime
-from util import format_duration, is_less_than_2_months_old, format_iso_date, format_date_ddmmyyyy
+from util import get_streaks, get_highest_contribution, get_active_days, get_todays_commits, format_duration, is_less_than_2_months_old, format_iso_date, format_date_ddmmyyyy
 
 def process_contribution_data(data: dict):
     """
@@ -15,57 +15,24 @@ def process_contribution_data(data: dict):
         contributions_collection = data['data']['user']['contributionsCollection']
         calendar = contributions_collection['contributionCalendar']
         days = [day for week in calendar['weeks'] for day in week['contributionDays']]
+        weeks = calendar.get("weeks", [])
         
         # Safely get contribution counts with fallbacks to 0
         public_contributions = calendar.get('totalContributions', 0)
         private_contributions = contributions_collection.get('restrictedContributionsCount', 0)
         total_contributions = public_contributions + private_contributions
-        
-        # Ensure we have valid contribution counts
-        if not isinstance(public_contributions, (int, float)):
-            public_contributions = 0
-        if not isinstance(private_contributions, (int, float)):
-            private_contributions = 0
             
         # Calculate highest contribution
-        try:
-            highest_day = max(days, key=lambda day: day['contributionCount'])
-            highest_contribution = highest_day['contributionCount']
-            highest_contribution_date = format_date_ddmmyyyy(highest_day['date'])
-        except (ValueError, KeyError):
-            highest_contribution = 0
-            highest_contribution_date = None
-        
-        current_streak = 0
-        longest_streak = 0
+        highest_contribution, highest_contribution_date = get_highest_contribution(days)
         
         # Calculate streaks with validation
-        try:
-            for day in days:
-                if day.get('contributionCount', 0) > 0:
-                    current_streak += 1
-                    longest_streak = max(longest_streak, current_streak)
-                else:
-                    current_streak = 0
-        except (TypeError, KeyError):
-            current_streak = 0
-            longest_streak = 0
+        current_streak, longest_streak = get_streaks(days)
 
-        # Extract contribution days
-        weeks = calendar.get("weeks", [])
-        contribution_days = [day["date"] for week in weeks for day in week["contributionDays"] if day["contributionCount"] > 0]
-        active_days = len(set(contribution_days))  # Unique active contribution days
-        
-        # Today's Date in format of how it's fetched from GraohQL
-        today = datetime.now().strftime("%Y-%m-%d") 
+        # Calculate Active Days
+        active_days = get_active_days(weeks)
 
-        # Find today's contributions
-        today_commits = sum(
-            day["contributionCount"]
-            for week in weeks
-            for day in week["contributionDays"]
-            if day["date"] == today
-        )
+        # Find today's commits
+        today_commits = get_todays_commits(weeks)
 
         return {
             "total_contributions": total_contributions,
@@ -185,7 +152,7 @@ def analyze_contributions(data):
 
         contribution_rate = total_contributions / total_days  # Contributions per day
 
-        active_days = sum(1 for week in contributions for day in week["contributionDays"] if day["contributionCount"] > 0)
+        active_days = get_active_days(contributions)
 
         return {
             "total_contributions": total_contributions,

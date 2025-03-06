@@ -4,78 +4,13 @@ from datetime import datetime
 from fetch_github_data import fetch_data_for_duration, fetch_star_count, fetch_user_data
 from process_github_data import analyze_contributions, process_user_data
 from util import predict_days_to_milestone, get_milestone_dates, format_date_ddmmyyyy
-
-TOKEN = st.secrets["token"]
+from streamlit_ui import base_ui, nav_ui
 
 def main():
-    st.set_page_config(
-        page_title = "GitHub Stats",
-        page_icon = "./static/icon.png",
-        layout = "wide",
-        menu_items={
-            "About": """
-            This is a Streamlit app that tracks your GitHub contributions and provides insights into your activity.  
-            Built by [:red[TheCarBun]](https://github.com/TheCarBun/) & [:red[Pakagronglb]](https://github.com/pakagronglb)  
-            GitHub: [:green[GitHub-Stats]](https://github.com/TheCarBun/GitHub-Stat-Checker)
-            """,
-            
-            "Report a bug": "https://github.com/TheCarBun/GitHub-Stat-Checker/issues",
-        }
-    )
-
-    # Initializing session state
-    if 'username' not in sst:
-        sst.username = ''
-    if 'user_token' not in sst:
-        sst.user_token = ''
-    if 'token_present' not in sst:
-        sst.token_present = False
-    if 'button_pressed' not in sst:
-        sst.button_pressed = False
-
-    # Title and input
-    title_col, star_col = st.columns([8.5,1.5], vertical_alignment="bottom")
-    title_col.title("GitHub Stats")
-    stars = fetch_star_count()
-    star_col.link_button(f"⭐ Star :orange[(**{stars}**)]", 
-                         "https://github.com/TheCarBun/GitHub-Stat-Checker", 
-                         help=f"Give a star to this repository on GitHub. Current stars: {stars}",
-                         use_container_width=True)
-    with st.sidebar:            
-        form = st.container(border=True)
-        sst.username = form.text_input("Enter GitHub Username:", value=sst.username)
-        
-        if form.toggle("I have a GitHub Access Token", value=sst.token_present, help="Toggle if you have a token. Create [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)"):
-            sst.token_present = True
-        else:
-            sst.token_present = False
-        
-        # Add warning about token permissions if showing private contributions
-        if sst.token_present:
-            sst.user_token = form.text_input("Enter GitHub Personal Access Token:", value=sst.user_token, type="password")
-            sst.token = sst.user_token
-        else:
-            sst.token = TOKEN
-        
-        if form.button("Analyze", type="primary"):
-            sst.button_pressed = True
-
+    base_ui()
 
     if sst.username and sst.token and sst.button_pressed:
-        with st.sidebar:
-            with st.container(border=True):
-                st.page_link(
-                    "app.py", 
-                    label="Overview", 
-                    icon="✨",
-                    help="ℹ️ Check your GitHub stats and contributions."
-                    )
-                st.page_link(
-                    "./pages/predictions.py", 
-                    label="Predictions", 
-                    icon="⚡",
-                    help="ℹ️ Predict your GitHub contributions."
-                    )  
+        nav_ui()
                 
         # Fetch data
         user_data = fetch_user_data(sst.username, sst.token)

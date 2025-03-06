@@ -1,6 +1,64 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
+def get_streaks(days:list):
+    current_streak = 0
+    longest_streak = 0
+    try:
+        for day in days:
+            if day.get('contributionCount', 0) > 0:
+                current_streak += 1
+                longest_streak = max(longest_streak, current_streak)
+            else:
+                current_streak = 0
+    except (TypeError, KeyError):
+        current_streak = 0
+        longest_streak = 0
+    return current_streak, longest_streak
+
+def get_highest_contribution(days):
+    
+    try:
+        highest_day = max(days, key=lambda day: day['contributionCount'])
+        highest_contribution = highest_day['contributionCount']
+        highest_contribution_date = format_date_ddmmyyyy(highest_day['date'])
+        
+    except (ValueError, KeyError):
+        highest_contribution = 0
+        highest_contribution_date = None
+    
+    return highest_contribution, highest_contribution_date
+
+def get_active_days(weeks):
+    # Extract contribution days
+    try:
+        contribution_days = [day["date"] for week in weeks for day in week["contributionDays"] if day["contributionCount"] > 0]
+        active_days = len(set(contribution_days))  # Unique active contribution days
+    except Exception as e:
+        print(e)
+        active_days = 0
+
+    return active_days
+
+def get_todays_commits(weeks):
+    try:
+        # Today's Date in format of how it's fetched from GraohQL
+        today = datetime.now().strftime("%Y-%m-%d") 
+
+        # Find today's contributions
+        today_commits = sum(
+            day["contributionCount"]
+            for week in weeks
+            for day in week["contributionDays"]
+            if day["date"] == today
+        )
+    except Exception as e:
+        print(e)
+        today_commits = 0
+    
+    return today_commits
+        
+
 def format_duration(iso_date:str) -> str:
     """
     Formats the duration from the given ISO date to the current date in years, months, and days.
