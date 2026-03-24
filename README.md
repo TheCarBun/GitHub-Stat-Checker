@@ -98,6 +98,15 @@ GitHub Contribution Tracker is a **Streamlit** web application that visualizes G
 2. Provide a **GitHub Personal Access Token** (with `read:user` and `repo` scopes for GraphQL API access).
 3. View detailed stats, visualizations, and achievements based on your contribution data.
 
+### Control browser auto-open via server config 
+
+If you don't want your browser to automatically open the dashboard everytime you run `streamlit run app.py`, just add the following two lines to your `config.toml` in `.streamlit` folder:
+
+```
+[server]
+headless = true
+```
+
 ### How to Generate a GitHub Personal Access Token
 
 1. Go to [GitHub Developer Settings](https://github.com/settings/tokens).
