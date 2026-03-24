@@ -6,6 +6,7 @@ from utils.fetch_github_data import fetch_star_count
 # Keep `token` required in deployed environments.
 TOKEN = st.secrets.get("token", "") if hasattr(st, "secrets") else ""
 DEFAULT_USERNAME = st.secrets.get("username", "") if hasattr(st, "secrets") else ""
+AUTOLOAD = st.secrets.get("autoload", False) if hasattr(st, "secrets") else False
 
 def base_ui():
     """
@@ -27,8 +28,11 @@ def base_ui():
     # Title and input
     title_bar()
 
-    with st.sidebar:
+    with st.sidebar.expander("Controls", expanded=not AUTOLOAD):
         form() # Streamlit Form
+
+        if AUTOLOAD and sst.username and sst.token:
+            sst.button_pressed = True
 
         if sst.username and sst.token and sst.button_pressed:
             nav_ui() # Sidebar navigation menu
