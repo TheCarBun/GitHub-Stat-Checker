@@ -2,7 +2,11 @@ import streamlit as st
 from streamlit import session_state as sst
 from utils.fetch_github_data import fetch_star_count
 
-TOKEN = st.secrets["token"]
+# Read secrets with fallback for local/dev usage.
+# Keep `token` required in deployed environments.
+TOKEN = st.secrets.get("token", "") if hasattr(st, "secrets") else ""
+DEFAULT_USERNAME = st.secrets.get("username", "") if hasattr(st, "secrets") else ""
+AUTOLOAD = st.secrets.get("autoload", False) if hasattr(st, "secrets") else False
 
 def base_ui():
     """
@@ -24,8 +28,11 @@ def base_ui():
     # Title and input
     title_bar()
 
-    with st.sidebar:
+    with st.sidebar.expander("Controls", expanded=not AUTOLOAD):
         form() # Streamlit Form
+
+        if AUTOLOAD and sst.username and sst.token:
+            sst.button_pressed = True
 
         if sst.username and sst.token and sst.button_pressed:
             nav_ui() # Sidebar navigation menu
@@ -75,13 +82,25 @@ def initialize_sst():
 
     # Initializing session state
     if 'username' not in sst:
-        sst.username = ''
+        sst.username = DEFAULT_USERNAME
     if 'user_token' not in sst:
         sst.user_token = ''
     if 'token_present' not in sst:
         sst.token_present = False
     if 'button_pressed' not in sst:
         sst.button_pressed = False
+    if 'token' not in sst:
+        sst.token = TOKEN
+
+    # If we have a username in secrets, prefill the input and mark the button state
+    if DEFAULT_USERNAME and not sst.username:
+        sst.username = DEFAULT_USERNAME
+    # If a token is present in secrets and user has not manually provided one, use it
+    if TOKEN and not sst.user_token:
+        sst.user_token = TOKEN
+        sst.token = TOKEN
+        sst.token_present = False
+
 
 def title_bar():
     """

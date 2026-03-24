@@ -94,8 +94,16 @@ GitHub Contribution Tracker is a **Streamlit** web application that visualizes G
 
 ## Usage
 
-1. Enter your **GitHub Username**.
-2. Provide a **GitHub Personal Access Token** (with `read:user` and `repo` scopes for GraphQL API access).
+1. Enter your credentials into `.stremlit/secrets.toml`.
+2. Provide a **GitHub Personal Access Token** (with `read:user` and `repo` scopes for GraphQL API access), your **GitHub username**, and set **autoload** to `true` or `false` _(`true` recommended)_.
+
+  `secrets.toml` example:
+  ```
+  token = "github_pat_..."
+  username = "my-github-username"
+  autoload = true
+  ```
+
 3. View detailed stats, visualizations, and achievements based on your contribution data.
 
 ### Control browser auto-open via server config 
