@@ -17,10 +17,10 @@ def process_contribution_data(data: dict):
         days = [day for week in calendar['weeks'] for day in week['contributionDays']]
         weeks = calendar.get("weeks", [])
         
-        # Safely get contribution counts with fallbacks to 0
-        public_contributions = calendar.get('totalContributions', 0)
+        # GitHub GraphQL returns contributionCalendar.totalContributions as combined public + restricted counts.
+        total_contributions = calendar.get('totalContributions', 0)
         private_contributions = contributions_collection.get('restrictedContributionsCount', 0)
-        total_contributions = public_contributions + private_contributions
+        public_contributions = max(total_contributions - private_contributions, 0)
             
         # Calculate highest contribution
         highest_contribution, highest_contribution_date = get_highest_contribution(days)
