@@ -1,5 +1,0 @@
-__pycache__
-.venv
-test.py 
-data.json
-.streamlit/secrets.toml
