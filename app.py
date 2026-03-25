@@ -150,12 +150,41 @@ def main():
                 st.markdown("### Contributions Over Time")
                 with st.container(border=True):
                     chart_data = pd.DataFrame({"Date": dates, "Contributions": contributions})
-                    st.line_chart(
-                        chart_data.set_index("Date"), 
-                        x_label="Date", 
-                        y_label=f"Contributions", 
-                        color=color
+                    max_contrib = int(chart_data.Contributions.max() if not chart_data.empty else 1)
+                    fig = go.Figure()
+                    fig.add_trace(go.Scatter(
+                        x=chart_data["Date"],
+                        y=chart_data["Contributions"],
+                        mode="lines+markers",
+                        name="Contributions",
+                        line=dict(color=color)
+                    ))
+
+                    fig.update_layout(
+                        xaxis_title="Time Range",
+                        yaxis_title="Contribution Count",
+                        yaxis=dict(rangemode="tozero", autorange=True, tick0=0),
+                        xaxis=dict(rangeslider=dict(visible=True), type="date"),
+                        margin=dict(l=30, r=20, t=30, b=30),
+                        hovermode="x unified",
+                        template="plotly_white"
                     )
+
+                    fig.update_yaxes(
+                        range=[0, max_contrib * 1.1 if max_contrib > 0 else 1], 
+                        fixedrange=True,
+                        autorange=True,
+                        rangemode="tozero",
+                    )
+                    fig.update_xaxes(
+                        fixedrange=False,
+                        rangeslider=dict(visible=True),
+                        type="date",
+                        constrain="range",
+                    )
+                    fig.update_layout(dragmode='zoom')
+
+                    st.plotly_chart(fig, width='stretch', config={"scrollZoom": True})
 
                 # --- Growth and Statistics ---
 
