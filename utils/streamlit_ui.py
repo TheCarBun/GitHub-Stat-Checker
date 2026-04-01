@@ -3,8 +3,20 @@ import streamlit as st
 from streamlit import session_state as sst
 from utils.fetch_github_data import fetch_star_count
 
-# CLI argument support for inspect mode
-INSPECT_MODE = "--inspect" in sys.argv or "inspect" in sys.argv
+# CLI argument support for mystats/inspect mode
+# Behavior required by CarBun's request:
+# 1) `streamlit run app.py` should behave like `--server.headless false -- inspect` in upgraded previous workflow.
+# 2) `streamlit run app.py -- mystats` should behave like default run mode (`streamlit run app.py`) in upgraded previous workflow.
+INSPECT_ARG = "--inspect" in sys.argv or "inspect" in sys.argv
+MYSTATS_ARG = "mystats" in sys.argv
+NO_ARGS = len(sys.argv) == 1
+
+if MYSTATS_ARG:
+    INSPECT_MODE = False
+elif NO_ARGS:
+    INSPECT_MODE = True
+else:
+    INSPECT_MODE = INSPECT_ARG
 
 # Read secrets with fallback for local/dev usage.
 # Keep `token` required in deployed environments.
@@ -69,6 +81,10 @@ def page_config():
         - About: Provides information about the app and its developers.
         - Report a bug: Link to the GitHub issues page for reporting bugs.
     """
+
+    # My note AKA try-not-to-forget:
+    # Inspec-mode behavior is handled at logic level, not by set_option at runtime (not allowed for server.headless).
+    # Configure server.headless through streamlit command-line args or config separately if needed.
 
     st.set_page_config(
         page_title = "GitHub Stats",
