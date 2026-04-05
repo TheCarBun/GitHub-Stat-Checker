@@ -84,9 +84,24 @@ GitHub Contribution Tracker is a **Streamlit** web application that visualizes G
 
 3. Run the app:
 
-   ```bash
-   streamlit run app.py
-   ```
+    <br>
+
+    To run a version with your stats loaded automatically*:
+    
+    ```bash
+    streamlit run app.py
+    ```
+    _*You need to fill out your credentials to secrets file (see below)_
+
+    <br>
+
+    To run an empty version:
+    
+    ```bash
+    streamlit run app.py -- inspect
+    ```  
+
+    <br>  
 
 4. Open your browser and navigate to the URL shown in the terminal (usually `http://localhost:8501`).
 
@@ -94,15 +109,15 @@ GitHub Contribution Tracker is a **Streamlit** web application that visualizes G
 
 ## Usage
 
-1. Enter your credentials into `.stremlit/secrets.toml`.
+1. Enter your credentials into either `.stremlit/secrets.toml` (in repo root), or to system streamlit file, on Win11 it's in `C:\Users\{USER}\.streamlit`, Linux `/home/{USER}/.steamlit`.
 2. Provide a **GitHub Personal Access Token** (with `read:user` and `repo` scopes for GraphQL API access), your **GitHub username**, and set **autoload** to `true` or `false` _(`true` recommended)_.
 
-  `secrets.toml` example:
-  ```
-  token = "github_pat_..."
-  username = "my-github-username"
-  autoload = true
-  ```
+    `secrets.toml` example:
+    ```
+    token = "github_pat_..."
+    username = "my-github-username"
+    autoload = true
+    ```
 
 3. View detailed stats, visualizations, and achievements based on your contribution data.
 
@@ -110,11 +125,10 @@ GitHub Contribution Tracker is a **Streamlit** web application that visualizes G
 
 If you don't want your browser to automatically open the dashboard everytime you run `streamlit run app.py`, just add the following two lines to your `config.toml` in `.streamlit` folder:
 
-```
-[server]
-headless = true
-```
-
+  ```
+  [server]
+  headless = true
+  ```
 ### How to Generate a GitHub Personal Access Token
 
 1. Go to [GitHub Developer Settings](https://github.com/settings/tokens).
