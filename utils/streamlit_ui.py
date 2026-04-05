@@ -1,8 +1,16 @@
+import sys
 import streamlit as st
 from streamlit import session_state as sst
 from utils.fetch_github_data import fetch_star_count
 
-TOKEN = st.secrets["token"]
+# CLI argument support for inspect mode
+INSPECT_MODE = "--inspect" in sys.argv or "inspect" in sys.argv
+
+# Read secrets with fallback for local/dev usage.
+# Keep `token` required in deployed environments.
+TOKEN = st.secrets.get("token", "") if hasattr(st, "secrets") else ""
+DEFAULT_USERNAME = st.secrets.get("username", "") if hasattr(st, "secrets") else ""
+AUTOLOAD = (st.secrets.get("autoload", False) if hasattr(st, "secrets") else False) and not INSPECT_MODE
 
 def base_ui():
     """
@@ -24,14 +32,30 @@ def base_ui():
     # Title and input
     title_bar()
 
-    with st.sidebar:
-        form() # Streamlit Form
+    if INSPECT_MODE:
+        # DEBUG mode: keep sidebar fully visible and inspect flow explicit
+        with st.sidebar:
+            form()
 
-        if sst.username and sst.token and sst.button_pressed:
-            nav_ui() # Sidebar navigation menu
+            # autoload intentionally disabled in inspect mode
+            if sst.username and sst.token and sst.button_pressed:
+                nav_ui()
 
-        # how_to_use()
-        promo()
+            promo()
+    else:
+        # normal mode starts collapsed, whether or not autoload is configured,
+        # because the app should not show the controls by default.
+        with st.sidebar.expander("Controls", expanded=False):
+            form() # Streamlit Form
+
+            if AUTOLOAD and sst.username and sst.token:
+                sst.button_pressed = True
+
+            if sst.username and sst.token and sst.button_pressed:
+                nav_ui() # Sidebar navigation menu
+
+            # how_to_use()
+            promo()
 
 
 def page_config():
@@ -75,13 +99,30 @@ def initialize_sst():
 
     # Initializing session state
     if 'username' not in sst:
-        sst.username = ''
+        sst.username = DEFAULT_USERNAME
     if 'user_token' not in sst:
         sst.user_token = ''
     if 'token_present' not in sst:
         sst.token_present = False
     if 'button_pressed' not in sst:
         sst.button_pressed = False
+    if 'token' not in sst:
+        sst.token = TOKEN
+
+    # If inspect mode is enabled, keep username empty for backend steps
+    if INSPECT_MODE:
+        sst.username = ""
+    else:
+        # If we have a username in secrets, prefill the input and mark the button state
+        if DEFAULT_USERNAME and not sst.username:
+            sst.username = DEFAULT_USERNAME
+
+    # If a token is present in secrets and user has not manually provided one, use it
+    if TOKEN and not sst.user_token:
+        sst.user_token = TOKEN
+        sst.token = TOKEN
+        sst.token_present = False
+
 
 def title_bar():
     """
