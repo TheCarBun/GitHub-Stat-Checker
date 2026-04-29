@@ -190,267 +190,245 @@ def main():
 
                 st.markdown("### Growth and Statistics")
                 with st.container():
-                    if sst.user_token:
-                        # Fetch data
-                        chart_data['Year'] = chart_data['Date'].dt.year
-                        yearly_contributions = chart_data.groupby('Year')['Contributions'].sum().round(1)  # Round to 1 decimal
+                    # Fetch data
+                    chart_data['Year'] = chart_data['Date'].dt.year
+                    yearly_contributions = chart_data.groupby('Year')['Contributions'].sum().round(1)  # Round to 1 decimal
                     
                     # ------------- Last Year Contributions
                     with st.container(border=True):
                         st.markdown(f"#### :material/calendar_month: **Contributions in {datetime.now().year-1}:**")
-                        if sst.user_token:
-                            # --- 365 days stats ---
-                            last_jan1st = datetime(datetime.now().year-1, 1, 1).strftime("%Y-%m-%d")
-                            last_dec31st = datetime(datetime.now().year-1, 12, 31).strftime("%Y-%m-%d")
-                            
-                            last_year_data_present = True
-                            from_date= last_jan1st# Date comes before Jan 1st. We use Jan 1st as starting date
-                            to_date= last_dec31st
-
-                            # Date comes between Jan 1st and Dec 31st. We use join date as start date
-                            if last_jan1st < created_at < last_dec31st: 
-                                from_date= created_at
-                            # Date comes after Dec 31st. Unable to calculate rate for last year
-                            elif created_at >= last_dec31st:
-                                last_year_data_present = False
-
-                            # If last year data is present    
-                            if last_year_data_present:
-                                year_data = fetch_data_for_duration(
-                                    sst.username, 
-                                    sst.token,
-                                    from_date= from_date,
-                                    to_date= to_date
-                                )
-                                # Process data
-                                whole_year_stats = analyze_contributions(year_data)
-
-                                total_contributions_ly = whole_year_stats.get('total_contributions')
-                                total_days_ly = whole_year_stats.get('total_days')
-                                contribution_rate_ly = whole_year_stats.get('contribution_rate')
-                                active_days_ly = whole_year_stats.get('active_days')
-                                percent_active_days_ly = (whole_year_stats.get('active_days')/total_days_ly)*100
-                                since = f'`since {format_date_ddmmyyyy(from_date)}`' if from_date != last_jan1st else ''
-                                growth_stats(
-                                    total_contributions=total_contributions_ly, 
-                                    contribution_rate=contribution_rate_ly, 
-                                    active_days=active_days_ly, 
-                                    total_days= total_days_ly,
-                                    percent_active_days=percent_active_days_ly, 
-                                    since=since)
-                            else:
-                                st.info(f"No Data for year {datetime.now().year-1}")
-                        else:
-                            st.info("Create GitHub Access Token to view these stats")
                         
-                        # --- Current year stats ---
-                        st.markdown(f"#### :material/calendar_today: **Contributions in {datetime.now().year}:**")
-                        if sst.user_token:
-                            today = datetime.now().strftime("%Y-%m-%d")
-                            current_jan1st = datetime(datetime.now().year, 1, 1).strftime("%Y-%m-%d")
+                        # --- 365 days stats ---
+                        last_jan1st = datetime(datetime.now().year-1, 1, 1).strftime("%Y-%m-%d")
+                        last_dec31st = datetime(datetime.now().year-1, 12, 31).strftime("%Y-%m-%d")
+                        
+                        last_year_data_present = True
+                        from_date= last_jan1st# Date comes before Jan 1st. We use Jan 1st as starting date
+                        to_date= last_dec31st
+
+                        # Date comes between Jan 1st and Dec 31st. We use join date as start date
+                        if last_jan1st < created_at < last_dec31st: 
                             from_date= created_at
-                            # Fetching current year data
-                            if current_jan1st >= created_at: # If joined before Jan 1st
-                                from_date= current_jan1st
-                            current_year_data = fetch_data_for_duration(
+                        # Date comes after Dec 31st. Unable to calculate rate for last year
+                        elif created_at >= last_dec31st:
+                            last_year_data_present = False
+
+                        # If last year data is present    
+                        if last_year_data_present:
+                            year_data = fetch_data_for_duration(
                                 sst.username, 
                                 sst.token,
                                 from_date= from_date,
-                                to_date= today
-                                )
-
-                            # Process data
-                            current_year_stats = analyze_contributions(current_year_data)
-
-                            total_contributions = current_year_stats.get('total_contributions')
-                            total_days = current_year_stats.get('total_days')
-                            contribution_rate = current_year_stats.get('contribution_rate')
-                            active_days = current_year_stats.get('active_days')
-                            percent_active_days = (current_year_stats.get('active_days')/total_days)*100
-                            since = f'`since {format_date_ddmmyyyy(from_date)}`' if from_date != current_jan1st else ''
-
-                            growth_stats(
-                                total_contributions=total_contributions,
-                                contribution_rate=contribution_rate,
-                                active_days=active_days,
-                                total_days=total_days,
-                                percent_active_days=percent_active_days,
-                                since=since
+                                to_date= to_date
                             )
+                            # Process data
+                            whole_year_stats = analyze_contributions(year_data)
+
+                            total_contributions_ly = whole_year_stats.get('total_contributions')
+                            total_days_ly = whole_year_stats.get('total_days')
+                            contribution_rate_ly = whole_year_stats.get('contribution_rate')
+                            active_days_ly = whole_year_stats.get('active_days')
+                            percent_active_days_ly = (whole_year_stats.get('active_days')/total_days_ly)*100
+                            since = f'`since {format_date_ddmmyyyy(from_date)}`' if from_date != last_jan1st else ''
+                            growth_stats(
+                                total_contributions=total_contributions_ly, 
+                                contribution_rate=contribution_rate_ly, 
+                                active_days=active_days_ly, 
+                                total_days= total_days_ly,
+                                percent_active_days=percent_active_days_ly, 
+                                since=since)
                         else:
-                            st.info("Create GitHub Access Token to view these stats")
+                            st.info(f"No Data for year {datetime.now().year-1}")
+                        
+                        # --- Current year stats ---
+                        st.markdown(f"#### :material/calendar_today: **Contributions in {datetime.now().year}:**")
+                        today = datetime.now().strftime("%Y-%m-%d")
+                        current_jan1st = datetime(datetime.now().year, 1, 1).strftime("%Y-%m-%d")
+                        from_date= created_at
+                        # Fetching current year data
+                        if current_jan1st >= created_at: # If joined before Jan 1st
+                            from_date= current_jan1st
+                        current_year_data = fetch_data_for_duration(
+                            sst.username, 
+                            sst.token,
+                            from_date= from_date,
+                            to_date= today
+                            )
+
+                        # Process data
+                        current_year_stats = analyze_contributions(current_year_data)
+
+                        total_contributions = current_year_stats.get('total_contributions')
+                        total_days = current_year_stats.get('total_days')
+                        contribution_rate = current_year_stats.get('contribution_rate')
+                        active_days = current_year_stats.get('active_days')
+                        percent_active_days = (current_year_stats.get('active_days')/total_days)*100
+                        since = f'`since {format_date_ddmmyyyy(from_date)}`' if from_date != current_jan1st else ''
+
+                        growth_stats(
+                            total_contributions=total_contributions,
+                            contribution_rate=contribution_rate,
+                            active_days=active_days,
+                            total_days=total_days,
+                            percent_active_days=percent_active_days,
+                            since=since
+                        )
 
                     st.markdown("### Visualizations:")
                     col1, col2 = st.columns(2, border=True, vertical_alignment="center")
 
                     col1.markdown("### Yearly Growth")
-                    if sst.user_token:
-                        col1.bar_chart(yearly_contributions, color=color)
-                    else:
-                        col1.info("Create GitHub Access Token to view these stats")
+                    col1.bar_chart(yearly_contributions, color=color)
 
                     # Display monthly growth visualization in Jan-2023 format
                     with st.container(border=True):
                         st.markdown("### Monthly Growth")
-                        if sst.user_token:
-                            # Convert dates to datetime format
-                            chart_data["Date"] = pd.to_datetime(chart_data["Date"])
-                            
-                            # Create year and month columns for grouping
-                            chart_data["Sort_Key"] = chart_data["Date"].dt.strftime("%Y-%m")
-                            
-                            # Group and aggregate
-                            monthly_data = chart_data.groupby("Sort_Key")["Contributions"].sum().reset_index()
-                            monthly_data["Display_Date"] = pd.to_datetime(monthly_data["Sort_Key"] + "-01")
-                            monthly_data = monthly_data.sort_values("Display_Date")
-                            
-                            # Create Plotly bar chart
-                            fig = go.Figure(go.Bar(
-                                x=monthly_data["Display_Date"].dt.strftime("%b %Y"),
-                                y=monthly_data["Contributions"],
-                                marker_color=color
-                            ))
-                            
-                            # Update layout for dark theme compatibility
-                            fig.update_layout(
-                                plot_bgcolor='rgba(0,0,0,0)',
-                                paper_bgcolor='rgba(0,0,0,0)',
-                                font_color='white',
-                                showlegend=False,
-                                margin=dict(l=20, r=20, t=20, b=20),
-                                height=200,
-                                xaxis=dict(
-                                    showgrid=True,
-                                    gridcolor='rgba(128,128,128,0.2)'
-                                ),
-                                yaxis=dict(
-                                    showgrid=True,
-                                    gridcolor='rgba(128,128,128,0.2)'
-                                )
+                        # Convert dates to datetime format
+                        chart_data["Date"] = pd.to_datetime(chart_data["Date"])
+                        
+                        # Create year and month columns for grouping
+                        chart_data["Sort_Key"] = chart_data["Date"].dt.strftime("%Y-%m")
+                        
+                        # Group and aggregate
+                        monthly_data = chart_data.groupby("Sort_Key")["Contributions"].sum().reset_index()
+                        monthly_data["Display_Date"] = pd.to_datetime(monthly_data["Sort_Key"] + "-01")
+                        monthly_data = monthly_data.sort_values("Display_Date")
+                        
+                        # Create Plotly bar chart
+                        fig = go.Figure(go.Bar(
+                            x=monthly_data["Display_Date"].dt.strftime("%b %Y"),
+                            y=monthly_data["Contributions"],
+                            marker_color=color
+                        ))
+                        
+                        # Update layout for dark theme compatibility
+                        fig.update_layout(
+                            plot_bgcolor='rgba(0,0,0,0)',
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            font_color='white',
+                            showlegend=False,
+                            margin=dict(l=20, r=20, t=20, b=20),
+                            height=200,
+                            xaxis=dict(
+                                showgrid=True,
+                                gridcolor='rgba(128,128,128,0.2)'
+                            ),
+                            yaxis=dict(
+                                showgrid=True,
+                                gridcolor='rgba(128,128,128,0.2)'
                             )
-                            
-                            # Display the Plotly chart
-                            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-                        else:
-                            st.info("Create GitHub Access Token to view these stats")
+                        )
+                        
+                        # Display the Plotly chart
+                        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
                     # --- Weekday vs. Weekend Contributions ---
                     col2.markdown("### Weekday vs. Weekend")
-                    if sst.user_token:
-                        with col2.container(border=True):
-                            chart_data['IsWeekend'] = chart_data['Date'].dt.dayofweek >= 5
-                            weekend_data = chart_data.groupby('IsWeekend')['Contributions'].sum().round(1)
-                            weekend_data.index = ["Weekdays", "Weekends"]
-                            st.bar_chart(weekend_data, color=color, horizontal=True)
-                    else:
-                        col2.info("Create GitHub Access Token to view these stats")
+                    with col2.container(border=True):
+                        chart_data['IsWeekend'] = chart_data['Date'].dt.dayofweek >= 5
+                        weekend_data = chart_data.groupby('IsWeekend')['Contributions'].sum().round(1)
+                        weekend_data.index = ["Weekdays", "Weekends"]
+                        st.bar_chart(weekend_data, color=color, horizontal=True)
 
                     # --- Contributions by Day of Week ---
                     col2.markdown("### By Day of Week")
-                    if sst.user_token:
-                        with col2.container(border=True):
-                            # Ensure the 'Date' column is properly converted to datetime
-                            chart_data["Date"] = pd.to_datetime(chart_data["Date"])
-                            chart_data["Day"] = chart_data["Date"].dt.day_name()
+                    with col2.container(border=True):
+                        # Ensure the 'Date' column is properly converted to datetime
+                        chart_data["Date"] = pd.to_datetime(chart_data["Date"])
+                        chart_data["Day"] = chart_data["Date"].dt.day_name()
 
-                            # Aggregate contributions by day of the week
-                            day_totals = chart_data.groupby("Day")["Contributions"].sum()
+                        # Aggregate contributions by day of the week
+                        day_totals = chart_data.groupby("Day")["Contributions"].sum()
 
-                            # Create ordered lists for plotting (reversed order for top-to-bottom display)
-                            correct_order = ["Sunday", "Saturday", "Friday", "Thursday", "Wednesday", "Tuesday", "Monday"]
-                            values = [day_totals.get(day, 0) for day in correct_order]
+                        # Create ordered lists for plotting (reversed order for top-to-bottom display)
+                        correct_order = ["Sunday", "Saturday", "Friday", "Thursday", "Wednesday", "Tuesday", "Monday"]
+                        values = [day_totals.get(day, 0) for day in correct_order]
 
-                            # Create Plotly bar chart
-                            fig = go.Figure(go.Bar(
-                                x=values,
-                                y=correct_order,
-                                orientation='h',
-                                marker_color=color
-                            ))
+                        # Create Plotly bar chart
+                        fig = go.Figure(go.Bar(
+                            x=values,
+                            y=correct_order,
+                            orientation='h',
+                            marker_color=color
+                        ))
 
-                            # Update layout for dark theme compatibility
-                            fig.update_layout(
-                                plot_bgcolor='rgba(0,0,0,0)',
-                                paper_bgcolor='rgba(0,0,0,0)',
-                                font_color='white',
-                                showlegend=False,
-                                margin=dict(l=0, r=0, t=0, b=0),
-                                height=150,  # Reduce the height of the chart
-                                xaxis=dict(showgrid=True, gridcolor='rgba(128,128,128,0.2)'),
-                                yaxis=dict(showgrid=False)
-                            )
+                        # Update layout for dark theme compatibility
+                        fig.update_layout(
+                            plot_bgcolor='rgba(0,0,0,0)',
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            font_color='white',
+                            showlegend=False,
+                            margin=dict(l=0, r=0, t=0, b=0),
+                            height=150,  # Reduce the height of the chart
+                            xaxis=dict(showgrid=True, gridcolor='rgba(128,128,128,0.2)'),
+                            yaxis=dict(showgrid=False)
+                        )
 
-                            # Display the Plotly chart
-                            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-                    else:
-                        col2.info("Create GitHub Access Token to view these stats")
+                        # Display the Plotly chart
+                        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
             # Add Language Distribution
             st.markdown("### Programming Languages")
-            if sst.user_token:
 
-                # Fetch repository stats
-                repo_stats = process_language_data(repo_data)
-                
-                if repo_stats:
-                    with st.container(border=True):
-                        col1, col2 = st.columns([3,1], vertical_alignment="center", gap="small")
-                        # Sort languages by count and take top 6 languages
-                        sorted_data = dict(sorted(repo_stats.items(), key=lambda x: x[1]['count'], reverse=True))
-                        top_languages = dict(list(sorted_data.items())[:6])
-                        
-                        # Add "Others" category for remaining languages
-                        remaining_languages = dict(list(sorted_data.items())[6:])
-                        if remaining_languages:
-                            others_count = sum(lang_data['count'] for lang_data in remaining_languages.values())
-                            top_languages["Others"] = {"count": others_count, "color": "#808080"}  # Gray for "Others"
-                        
-                        # Create figure with fixed size
-                        fig, ax = plt.subplots(figsize=(8, 8))
-                        
-                        # Calculate percentages
-                        total = sum(lang_data["count"] for lang_data in sorted_data.values())
-                        
-                        # Extract colors from processed data
-                        colors = [lang_data["color"] for lang_data in top_languages.values()]
-                        
-                        # Create pie chart
-                        wedges, texts, autotexts = ax.pie(
-                            [lang_data["count"] for lang_data in top_languages.values()],
-                            labels=top_languages.keys(),
-                            autopct='%1.1f%%',
-                            startangle=90,
-                            colors=colors,
-                            textprops={'color': 'white', 'fontsize': 12},
-                            wedgeprops={'edgecolor': 'white', 'linewidth': 1}
-                        )
-                        
-                        ax.axis('equal')
-                        
-                        # Make the figure background transparent
-                        fig.patch.set_alpha(0.0)
-                        ax.patch.set_alpha(0.0)
-                        
-                        col2.pyplot(fig)
-                        
-                        # Display language breakdown in a table
-                        col1.markdown("#### Language Breakdown")
-                        lang_df = pd.DataFrame({
-                            "Language": top_languages.keys(),
-                            "Repositories": [lang_data["count"] for lang_data in top_languages.values()],
-                            "Percentage": [f"{lang_data['count'] / total:.1%}" for lang_data in top_languages.values()]
-                        })
-                        col1.dataframe(lang_df, hide_index=True)
-                else:
-                    st.warning("No language data available for the user's repositories.")
+            # Fetch repository stats
+            repo_stats = process_language_data(repo_data)
+            
+            if repo_stats:
+                with st.container(border=True):
+                    col1, col2 = st.columns([3,1], vertical_alignment="center", gap="small")
+                    # Sort languages by count and take top 6 languages
+                    sorted_data = dict(sorted(repo_stats.items(), key=lambda x: x[1]['count'], reverse=True))
+                    top_languages = dict(list(sorted_data.items())[:6])
+                    
+                    # Add "Others" category for remaining languages
+                    remaining_languages = dict(list(sorted_data.items())[6:])
+                    if remaining_languages:
+                        others_count = sum(lang_data['count'] for lang_data in remaining_languages.values())
+                        top_languages["Others"] = {"count": others_count, "color": "#808080"}  # Gray for "Others"
+                    
+                    # Create figure with fixed size
+                    fig, ax = plt.subplots(figsize=(8, 8))
+                    
+                    # Calculate percentages
+                    total = sum(lang_data["count"] for lang_data in sorted_data.values())
+                    
+                    # Extract colors from processed data
+                    colors = [lang_data["color"] for lang_data in top_languages.values()]
+                    
+                    # Create pie chart
+                    wedges, texts, autotexts = ax.pie(
+                        [lang_data["count"] for lang_data in top_languages.values()],
+                        labels=top_languages.keys(),
+                        autopct='%1.1f%%',
+                        startangle=90,
+                        colors=colors,
+                        textprops={'color': 'white', 'fontsize': 12},
+                        wedgeprops={'edgecolor': 'white', 'linewidth': 1}
+                    )
+                    
+                    ax.axis('equal')
+                    
+                    # Make the figure background transparent
+                    fig.patch.set_alpha(0.0)
+                    ax.patch.set_alpha(0.0)
+                    
+                    col2.pyplot(fig)
+                    
+                    # Display language breakdown in a table
+                    col1.markdown("#### Language Breakdown")
+                    lang_df = pd.DataFrame({
+                        "Language": top_languages.keys(),
+                        "Repositories": [lang_data["count"] for lang_data in top_languages.values()],
+                        "Percentage": [f"{lang_data['count'] / total:.1%}" for lang_data in top_languages.values()]
+                    })
+                    col1.dataframe(lang_df, hide_index=True)
             else:
-                st.info("Create GitHub Access Token to view these stats")
+                st.warning("No language data available for the user's repositories.")
 
             # Custom Achievements (based on visible contributions)
             st.markdown("### Achievements")
             with st.container():
-                if sst.user_token:
-                    st.success("Keep growing your GitHub stats to unlock more achievements! 🚀", icon="💪")
+                st.success("Keep growing your GitHub stats to unlock more achievements! 🚀", icon="💪")
                 streak_cont, contr_cont = st.columns(2)
                 # Define achievements with their criteria and thresholds
                 streak_achievements = {
@@ -475,51 +453,45 @@ def main():
                 # Display Streak Achievements
                 with streak_cont.container(border=True):
                     st.subheader("🔥 Streak Achievements")
-                    if sst.user_token:
-                        com_cont = st.container(border=False)
-                        inc_exp = st.expander(label="Locked Achievements", icon="🔒")
-                        current_streak = current_streak
-                        
-                        for title, details in streak_achievements.items():
-                            progress = min(100, (current_streak / details["required"]) * 100)
-                            if current_streak >= details["required"]:
-                                emoji = "✅"
-                                com_cont.markdown(f"{emoji} **:green[{title}]** : *{details['criteria']}*")
-                            else:
-                                emoji = "🔒"
-                                col1, col2 = inc_exp.columns([2, 1])
-                                col1.markdown(f"{emoji} **:orange[{title}]**")
-                                col1.markdown(f"*{details['criteria']}*")
-                                col2.markdown(f"**Progress: :orange[:orange-background[{progress:.1f}%]]**")
-                                if progress > 0:
-                                    inc_exp.progress(progress / 100, text=f":blue[{current_streak}/{details['required']}]")
-                                    inc_exp.divider()
-                    else:
-                        st.info("Create GitHub Access Token to view these stats")
+                    com_cont = st.container(border=False)
+                    inc_exp = st.expander(label="Locked Achievements", icon="🔒")
+                    current_streak = current_streak
+                    
+                    for title, details in streak_achievements.items():
+                        progress = min(100, (current_streak / details["required"]) * 100)
+                        if current_streak >= details["required"]:
+                            emoji = "✅"
+                            com_cont.markdown(f"{emoji} **:green[{title}]** : *{details['criteria']}*")
+                        else:
+                            emoji = "🔒"
+                            col1, col2 = inc_exp.columns([2, 1])
+                            col1.markdown(f"{emoji} **:orange[{title}]**")
+                            col1.markdown(f"*{details['criteria']}*")
+                            col2.markdown(f"**Progress: :orange[:orange-background[{progress:.1f}%]]**")
+                            if progress > 0:
+                                inc_exp.progress(progress / 100, text=f":blue[{current_streak}/{details['required']}]")
+                                inc_exp.divider()
 
                 # Display Contribution Achievements
                 total_contributions = cont_stats.get("total_contributions", 0)
                 with contr_cont.container(border=True):
                     st.subheader("🏆 Contribution Achievements")
-                    if sst.user_token:
-                        com_cont = st.container(border=False)
-                        inc_exp = st.expander(label="Locked Achievements", icon="🔒")
-                        for title, details in contribution_achievements.items():
-                            progress = min(100, (total_contributions / details["required"]) * 100)
-                            if total_contributions >= details["required"]:
-                                emoji = "✅"
-                                com_cont.markdown(f"{emoji} **:green[{title}]** : *{details['criteria']}*")
-                            else:
-                                emoji = "🔒"
-                                col1, col2 = inc_exp.columns([2, 1])
-                                col1.markdown(f"{emoji} **:orange[{title}]**")
-                                col1.markdown(f"*{details['criteria']}*")
-                                col2.markdown(f"**Progress: :orange[:orange-background[{progress:.1f}%]]** ")
-                                if progress > 0:
-                                    inc_exp.progress(progress / 100, text=f":blue[{total_contributions}/{details['required']}]")
-                                    inc_exp.divider()
-                    else:
-                        st.info("Create GitHub Access Token to view these stats")
+                    com_cont = st.container(border=False)
+                    inc_exp = st.expander(label="Locked Achievements", icon="🔒")
+                    for title, details in contribution_achievements.items():
+                        progress = min(100, (total_contributions / details["required"]) * 100)
+                        if total_contributions >= details["required"]:
+                            emoji = "✅"
+                            com_cont.markdown(f"{emoji} **:green[{title}]** : *{details['criteria']}*")
+                        else:
+                            emoji = "🔒"
+                            col1, col2 = inc_exp.columns([2, 1])
+                            col1.markdown(f"{emoji} **:orange[{title}]**")
+                            col1.markdown(f"*{details['criteria']}*")
+                            col2.markdown(f"**Progress: :orange[:orange-background[{progress:.1f}%]]** ")
+                            if progress > 0:
+                                inc_exp.progress(progress / 100, text=f":blue[{total_contributions}/{details['required']}]")
+                                inc_exp.divider()
     else:
         st.success("ℹ️ ***Enter your GitHub username in the sidebar to see your stats.***")
 
