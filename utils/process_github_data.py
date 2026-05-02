@@ -144,14 +144,16 @@ def analyze_contributions(data):
 
     try:
         contributions = data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]
-        
+        # Sum of all contributions in this time period
         total_contributions = sum(
             day["contributionCount"] for week in contributions for day in week["contributionDays"]
         )
+        # Total no. of days in this time period
         total_days = sum(1 for week in contributions for day in week["contributionDays"])
 
         contribution_rate = total_contributions / total_days  # Contributions per day
 
+        # Total no. of days user pushed a commit
         active_days = get_active_days(contributions)
 
         return {

@@ -49,8 +49,10 @@ def main():
             # --- Get required stats ---
             contribution_rate_ly = whole_year_stats.get('contribution_rate', 0)
             # active_days_ly = whole_year_stats.get('active_days', 0)
+            total_contributions_ly = whole_year_stats.get('total_contributions', 0)
         else:
             contribution_rate_ly = 0
+            total_contributions_ly = 0
 
 
         # -------------- Current Year Data
@@ -115,11 +117,37 @@ def main():
             col3.metric(
                 label="Predicted Active Days This Year",
                 value=f"{predicted_future_active_days + active_days:.0f} days",
-                delta=f"{'-' if predicted_future_active_days <= 0 else '+'} {predicted_future_active_days:.0f} days",
+                delta=f"{'-' if predicted_future_active_days <= 0 else '+'} {predicted_future_active_days:.0f} days more",
                 delta_color="off" if predicted_future_active_days <= 0 else "normal",
                 help="Total predicted active days this year, if user continues to contribute at the same rate",
                 border=True
             )
+        
+        # Contribution rate needed this year to match last year's rate
+        contributions_left = (total_contributions_ly - total_contributions)
+        with st.container():
+            if contributions_left < 0: # Already doing better than last year
+                st.success("Keep it up! You're already doing better than last year")
+            else:
+                rate_for_rem_days = contributions_left/remaining_days
+                rate_for_active_days = contributions_left/predicted_future_active_days
+
+                st.markdown("#### :material/graph_1: Contribution Gap")
+                colrem, colact = st.columns(2, border=True)
+
+                colrem.metric(
+                    label="On Remaining Days",
+                    value=f"{rate_for_rem_days:.0f} commits/day",
+                    delta=f"+{rate_for_rem_days-contribution_rate:.0f} needed",
+                    help="Contributions needed per day this year to match last year's contribution rate"
+                )
+                colact.metric(
+                    label="On Active Days",
+                    value=f"{rate_for_active_days:.0f} commits/day",
+                    delta = f"+{rate_for_active_days-contribution_rate:.0f} needed",
+                    help="Contributions needed per \"predicted active day\" this year to match last year's contribution rate"
+                )
+
 
         # Milestone goals
         milestones = [100, 500, 1000, 2000, 5000, 10000]
