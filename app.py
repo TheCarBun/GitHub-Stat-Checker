@@ -155,7 +155,7 @@ def main():
                     fig.add_trace(go.Scatter(
                         x=chart_data["Date"],
                         y=chart_data["Contributions"],
-                        mode="lines+markers",
+                        mode="lines",
                         name="Contributions",
                         line=dict(color=color)
                     ))
@@ -164,7 +164,7 @@ def main():
                         xaxis_title="Time Range",
                         yaxis_title="Contribution Count",
                         yaxis=dict(rangemode="tozero", autorange=True, tick0=0),
-                        xaxis=dict(rangeslider=dict(visible=True), type="date"),
+                        xaxis=dict(rangeslider=dict(visible=False), type="date"),
                         margin=dict(l=30, r=20, t=30, b=30),
                         hovermode="x unified",
                         template="plotly_white"
@@ -178,7 +178,7 @@ def main():
                     )
                     fig.update_xaxes(
                         fixedrange=False,
-                        rangeslider=dict(visible=True),
+                        rangeslider=dict(visible=False),
                         type="date",
                         constrain="range",
                     )
