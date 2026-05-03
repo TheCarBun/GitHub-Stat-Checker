@@ -320,7 +320,7 @@ def main():
                         )
                         
                         # Display the Plotly chart
-                        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+                        st.plotly_chart(fig, width=True, config={'displayModeBar': False})
 
                     # --- Weekday vs. Weekend Contributions ---
                     col2.markdown("### Weekday vs. Weekend")
@@ -365,7 +365,7 @@ def main():
                         )
 
                         # Display the Plotly chart
-                        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+                        st.plotly_chart(fig, width=True, config={'displayModeBar': False})
 
             # Add Language Distribution
             st.markdown("### Programming Languages")
