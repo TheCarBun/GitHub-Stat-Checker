@@ -38,8 +38,8 @@ def main():
                     followers = user_stats.get("followers")
                     following = user_stats.get("following")
                     repositories = user_stats.get("repositories")
-                    total_prs = user_stats.get("total_pullrequests")
-                    total_issues = user_stats.get("total_issues")
+                    total_prs = cont_stats.get("total_pullrequests")
+                    total_issues = cont_stats.get("total_issues")
                     created_at = datetime.strptime(user_stats.get("created_at"), "%Y-%m-%dT%H:%M:%SZ")
                     created_at = created_at.strftime("%Y-%m-%d")
 

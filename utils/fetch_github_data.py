@@ -1,5 +1,6 @@
 import requests
 import streamlit as st
+from datetime import datetime
 
 BASE_URL = "https://api.github.com/graphql"
 
@@ -131,41 +132,71 @@ def fetch_repo_data(username: str, token: str):
 @st.cache_data(ttl=300)
 def fetch_contribution_data(username: str, token: str):
     """
-    Fetch contribution data from GitHub GraphQL API.
+    Fetch all-time contribution data from GitHub GraphQL API by iterating through years.
 
     Args:
         username (str): GitHub username.
         token (str): GitHub personal access token.
 
     Returns:
-        dict: JSON response from GitHub API containing contribution data or error message.
+        dict: Aggregated JSON-like response containing all-time contribution data.
     """
-    headers = {"Authorization": f"Bearer {token}"}
-    query = f"""
-    {{
-        user(login: "{username}") {{
-            contributionsCollection {{
-                restrictedContributionsCount
-                totalPullRequestContributions
-                totalIssueContributions
-                contributionCalendar {{
-                    totalContributions
-                    weeks {{
-                        contributionDays {{
-                            contributionCount
-                            date
-                        }}
-                    }}
-                }}
-            }}
-        }}
-    }}
-    """
+    # 1. Get user's creation date
+    user_info = fetch_user_data(username, token)
+    if "errors" in user_info:
+        return user_info
+    
     try:
-        response = requests.post(BASE_URL, json={"query": query}, headers=headers)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
+        created_at_str = user_info['data']['user']['createdAt']
+        created_at = datetime.strptime(created_at_str, "%Y-%m-%dT%H:%M:%SZ")
+        start_year = created_at.year
+        end_year = datetime.now().year
+        
+        all_weeks = []
+        total_contributions = 0
+        restricted_contributions = 0
+        total_commits = 0
+        total_prs = 0
+        total_issues = 0
+        
+        # 2. Fetch data year by year (GitHub GraphQL limit is 1 year per request)
+        for year in range(start_year, end_year + 1):
+            from_date = f"{year}-01-01"
+            to_date = f"{year}-12-31"
+            
+            year_data = fetch_data_for_duration(username, token, from_date, to_date)
+            
+            if "data" in year_data and year_data["data"]["user"]:
+                collection = year_data["data"]["user"]["contributionsCollection"]
+                calendar = collection["contributionCalendar"]
+                
+                all_weeks.extend(calendar.get("weeks", []))
+                total_contributions += calendar.get("totalContributions", 0)
+                restricted_contributions += collection.get("restrictedContributionsCount", 0)
+                total_commits += collection.get("totalCommitContributions", 0)
+                total_prs += collection.get("totalPullRequestContributions", 0)
+                total_issues += collection.get("totalIssueContributions", 0)
+            elif "errors" in year_data:
+                return year_data
+                
+        # 3. Return aggregated structure compatible with process_contribution_data
+        return {
+            "data": {
+                "user": {
+                    "contributionsCollection": {
+                        "restrictedContributionsCount": restricted_contributions,
+                        "totalCommitContributions": total_commits,
+                        "totalPullRequestContributions": total_prs,
+                        "totalIssueContributions": total_issues,
+                        "contributionCalendar": {
+                            "totalContributions": total_contributions,
+                            "weeks": all_weeks
+                        }
+                    }
+                }
+            }
+        }
+    except Exception as e:
         return {"errors": str(e)}
 
 

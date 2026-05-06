@@ -21,6 +21,10 @@ def process_contribution_data(data: dict):
         total_contributions = calendar.get('totalContributions', 0)
         private_contributions = contributions_collection.get('restrictedContributionsCount', 0)
         public_contributions = max(total_contributions - private_contributions, 0)
+        
+        total_commits = contributions_collection.get('totalCommitContributions', 0)
+        total_prs = contributions_collection.get('totalPullRequestContributions', 0)
+        total_issues = contributions_collection.get('totalIssueContributions', 0)
             
         # Calculate highest contribution
         highest_contribution, highest_contribution_date = get_highest_contribution(days)
@@ -38,6 +42,9 @@ def process_contribution_data(data: dict):
             "total_contributions": total_contributions,
             "public_contributions": public_contributions,
             "private_contributions": private_contributions,
+            "total_commits": total_commits,
+            "total_pullrequests": total_prs,
+            "total_issues": total_issues,
             "highest_contribution": highest_contribution,
             "highest_contribution_date": highest_contribution_date,
             "today_commits": today_commits,
