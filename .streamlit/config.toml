@@ -4,3 +4,6 @@ showSidebarNavigation = false
 [theme]
 base = "dark"
 primaryColor = "#26a641"
+
+[server]
+headless = true
