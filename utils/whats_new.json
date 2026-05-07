@@ -1,0 +1,12 @@
+[
+  {
+    "title": "New Stat in Predictions",
+    "description": "Added new stat that shows how many contributions per day are needed to match with last year's contribution rate.\n\nCheck Predictions tab to view **Contributions Gap** stat.",
+    "type": "feat"
+  },
+  {
+    "title": "No token needed",
+    "description": "You can now view all stats without needing a GitHub token.\n\nHowever, to view private repository stats, you need to provide a GitHub token with 'repo' scope.",
+    "type": "enh"
+  }
+]
