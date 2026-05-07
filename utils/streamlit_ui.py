@@ -1,4 +1,6 @@
+from PIL.ImageOps import expand
 import streamlit as st
+import json
 from streamlit import session_state as sst
 from utils.fetch_github_data import fetch_star_count
 
@@ -31,7 +33,8 @@ def base_ui():
             nav_ui() # Sidebar navigation menu
 
         # how_to_use()
-        promo()
+        # promo()
+        whatsnew()
 
 
 def page_config():
@@ -202,3 +205,29 @@ def growth_stats(total_contributions:int, contribution_rate:int, active_days:int
         delta_color="inverse" if percent_active_days < 8 else "normal",
         border=True
         )
+
+def whatsnew():
+    with open("utils/whats_new.json", "r", encoding="UTF-8") as file:
+        whats_new = json.load(file)
+    
+    with st.expander("See What's New"):
+        for items in whats_new:
+            # Depending on Badge Type
+            if items["type"] == "enh":
+                badge = ":green-badge[:material/radio_button_checked:]"
+                with st.expander(f"**{badge} : {items['title']}**"):
+                    st.success(items["description"])
+            elif items["type"] == "feat":
+                badge = ":blue-badge[:material/radio_button_checked:]"
+                with st.expander(f"**{badge} : {items['title']}**"):
+                    st.info(items["description"])
+            elif items["type"] == "fix":
+                badge = ":orange-badge[:material/radio_button_checked:]"
+                with st.expander(f"**{badge} : {items['title']}**"):
+                    st.warning(items["description"])
+            else:
+                badge = ":red-badge[:material/radio_button_checked:]"
+                with st.expander(f"**{badge} : {items['title']}**"):
+                    st.error(items["description"])
+
+            
