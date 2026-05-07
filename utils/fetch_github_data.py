@@ -161,8 +161,17 @@ def fetch_contribution_data(username: str, token: str):
         
         # 2. Fetch data year by year (GitHub GraphQL limit is 1 year per request)
         for year in range(start_year, end_year + 1):
-            from_date = f"{year}-01-01"
-            to_date = f"{year}-12-31"
+            # First year starts from account creation date
+            if year == start_year:
+                from_date = created_at.strftime("%Y-%m-%d")
+            else:
+                from_date = f"{year}-01-01"
+
+            # Last year ends at current date
+            if year == end_year:
+                to_date = datetime.now().strftime("%Y-%m-%d")
+            else:
+                to_date = f"{year}-12-31"
             
             year_data = fetch_data_for_duration(username, token, from_date, to_date)
             
