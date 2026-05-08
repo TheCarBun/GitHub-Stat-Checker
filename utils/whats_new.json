@@ -8,5 +8,10 @@
     "title": "No token needed",
     "description": "You can now view all stats without needing a GitHub token.\n\nHowever, to view private repository stats, you need to provide a GitHub token with 'repo' scope.",
     "type": "enh"
+  },
+  {
+    "title": "Now shows whole history",
+    "description": "Instead of just last 365 days, Git-Stats now shows whole github history. This can be seen in all the visualizations and stats.",
+    "type": "enh"
   }
 ]
