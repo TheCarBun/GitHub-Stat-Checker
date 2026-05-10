@@ -3,8 +3,10 @@ import streamlit as st
 import json
 from streamlit import session_state as sst
 from utils.fetch_github_data import fetch_star_count
+import requests
 
 TOKEN = st.secrets["token"]
+WEBHOOK_URL = st.secrets["discord_webhook_url"]
 
 def base_ui():
     """
@@ -35,6 +37,7 @@ def base_ui():
         # how_to_use()
         # promo()
         whatsnew()
+        feedback_form()
 
 
 def page_config():
@@ -230,4 +233,28 @@ def whatsnew():
                 with st.expander(f"**{badge} : {items['title']}**"):
                     st.error(items["description"])
 
-            
+def post_to_discord(feedback:str):
+    payload = {
+        "embeds": [
+            {
+            "title": "Git-Stats Feedback",
+            "color": 7995170,
+            "description": feedback,
+            "thumbnail": {
+                "url": "https://cdn.iconscout.com/icon/premium/png-512-thumb/url-link-icon-svg-download-png-3671336.png"
+            }
+            }
+        ]
+        }
+    requests.post(WEBHOOK_URL, json=payload)
+
+def feedback_form():
+    with st.form("feedback_form", clear_on_submit=True):
+        feedback = st.text_area("Feedback", placeholder="Enter your feedback here...")
+        if feedback and st.form_submit_button("Submit"):
+            try:
+                post_to_discord(feedback)            
+                st.toast("Thank you for your feedback!")
+            except Exception as e:
+                st.toast("Something went wrong. Please try again later.")
+                print(e)
